@@ -72,6 +72,7 @@ export const loadLocation = async (readPowers, moduleLocation, options) => {
       transforms,
       __shimTransforms__,
       Compartment,
+      policy,
     } = options;
     const makeImportHook = makeImportHookMaker(readPowers, packageLocation);
     const { compartment } = link(compartmentMap, {
@@ -84,6 +85,7 @@ export const loadLocation = async (readPowers, moduleLocation, options) => {
       moduleTransforms,
       __shimTransforms__,
       Compartment,
+      policy,
     });
     return compartment.import(moduleSpecifier);
   };

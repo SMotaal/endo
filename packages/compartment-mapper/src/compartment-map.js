@@ -378,6 +378,7 @@ const assertCompartment = (allegedCompartment, path, url) => {
     types,
     scopes,
     modules,
+    policy, //TODO, provide better validation for that, also - what if missing?
     ...extra
   } = compartment;
 

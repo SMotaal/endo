@@ -58,7 +58,7 @@ export function scaffold(
   fixture,
   assertFixture,
   fixtureAssertionCount,
-  { onError, shouldFailBeforeArchiveOperations = false } = {},
+  { onError, shouldFailBeforeArchiveOperations = false, addGlobals = {}, policy = {} } = {},
 ) {
   // wrapping each time allows for convenient use of test.only
   const wrap = (testFunc, testCategoryHint) => (title, implementation) => {
@@ -74,7 +74,8 @@ export function scaffold(
       }
       return assertFixture(t, {
         namespace,
-        globals,
+        globals: { ...globals, ...addGlobals },
+        policy,
         globalLexicals,
         testCategoryHint,
       });
@@ -89,7 +90,8 @@ export function scaffold(
       dev: true,
     });
     const { namespace } = await application.import({
-      globals,
+      globals: { ...globals, ...addGlobals },
+      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -102,7 +104,8 @@ export function scaffold(
     await setup();
 
     const { namespace } = await importLocation(readPowers, fixture, {
-      globals,
+      globals: { ...globals, ...addGlobals },
+      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -131,7 +134,8 @@ export function scaffold(
       Compartment,
     });
     const { namespace } = await application.import({
-      globals,
+      globals: { ...globals, ...addGlobals },
+      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -158,7 +162,8 @@ export function scaffold(
         Compartment,
       });
       const { namespace } = await application.import({
-        globals,
+        globals: { ...globals, ...addGlobals },
+        policy,
         globalLexicals,
         modules,
         Compartment,
@@ -191,7 +196,8 @@ export function scaffold(
       Compartment,
     });
     const { namespace } = await application.import({
-      globals,
+      globals: { ...globals, ...addGlobals },
+      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -219,7 +225,8 @@ export function scaffold(
       dev: true,
     });
     const { namespace } = await importArchive(fakeRead, 'app.agar', {
-      globals,
+      globals: { ...globals, ...addGlobals },
+      policy,
       globalLexicals,
       modules,
       Compartment,

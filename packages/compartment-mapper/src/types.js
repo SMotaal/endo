@@ -239,6 +239,7 @@ export {};
  * @property {Array<Transform>} [__shimTransforms__]
  * @property {Record<string, Object>} [modules]
  * @property {Compartment} [Compartment]
+ * @property {Object} [policy]
  */
 
 /**
@@ -309,5 +310,6 @@ export {};
  * @property {ModuleTransforms} [moduleTransforms]
  * @property {Record<string, any>} [modules]
  * @property {boolean} [dev]
+ * @property {Object} [policy]
  * @property {CaptureSourceLocationHook} [captureSourceLocation]
  */

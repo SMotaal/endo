@@ -39,6 +39,7 @@ import { searchDescriptor } from './search.js';
 import { parseLocatedJson } from './json.js';
 import { unpackReadPowers } from './powers.js';
 import { pathCompare } from './compartment-map.js';
+import { policyEnforcer } from './policy.js';
 
 const { assign, create, keys, values } = Object;
 
@@ -457,9 +458,12 @@ const translateGraph = (
   entryModuleSpecifier,
   graph,
   tags,
+  policy,
 ) => {
   /** @type {Record<string, CompartmentDescriptor>} */
   const compartments = Object.create(null);
+
+  const policyApi = policyEnforcer(policy);
 
   // For each package, build a map of all the external modules the package can
   // import from other packages.
@@ -504,6 +508,8 @@ const translateGraph = (
       const packageLocation = dependencies[dependencyName];
       digest(dependencyName, packageLocation);
     }
+    const localPolicy = policyApi.getPolicyFor(name);
+
     compartments[packageLocation] = {
       label,
       name,
@@ -513,6 +519,7 @@ const translateGraph = (
       scopes,
       parsers,
       types,
+      policy: localPolicy
     };
   }
 
@@ -544,7 +551,7 @@ export const compartmentMapForNodeModules = async (
   moduleSpecifier,
   options = {},
 ) => {
-  const { dev = false } = options;
+  const { dev = false, policy } = options;
   const { read, canonical } = unpackReadPowers(readPowers);
   const graph = await graphPackages(
     read,
@@ -562,6 +569,7 @@ export const compartmentMapForNodeModules = async (
     moduleSpecifier,
     graph,
     tags,
+    policy,
   );
 
   return compartmentMap;
