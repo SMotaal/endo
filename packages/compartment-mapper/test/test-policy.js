@@ -16,6 +16,7 @@ const fixture = new URL(
 const globals = {
   redPill: 42,
   bluePill: 2,
+  yellowPill: 3,
 };
 const policy = {
   resources: {
@@ -30,50 +31,59 @@ const policy = {
         redPill: true,
       },
     },
+    'app>carol': {
+      globals: {
+        yellowPill: true,
+      },
+    },
   },
 };
 
-test('policy - globals access', async t => {
-  t.plan(2);
+const expectations = {
+  alice: { bluePill: 'undefined', redPill: 'number', yellowPill: 'undefined' },
+  bob: { bluePill: 'number', redPill: 'undefined', yellowPill: 'undefined' },
+  carol: { bluePill: 'undefined', redPill: 'undefined', yellowPill: 'number' },
+};
 
-  const application = await loadLocation(read, fixture);
+test('policy - globals access', async t => {
+  t.plan(1);
+
+  const application = await loadLocation(read, fixture, {
+    policy,
+  });
   const {
-    namespace: { alice, bob },
+    namespace: { alice, bob, carol },
   } = await application.import({
     globals,
     // globalLexicals explicitly ignored.
-    policy,
   });
 
-  t.deepEqual(alice, { bluePill: 'undefined', redPill: 'number' });
-  t.deepEqual(bob, { bluePill: 'number', redPill: 'undefined' });
+  t.deepEqual({ alice, bob, carol }, expectations);
 });
 
-test.only('policy - built into archive', async t => {
-  t.plan(2);
+test('policy - built into archive', async t => {
+  t.plan(1);
   const archive = await makeArchive(readPowers, fixture, {
     policy,
     dev: true,
   });
   const application = await parseArchive(archive, '<unknown>');
   const {
-    namespace: { alice, bob },
+    namespace: { alice, bob, carol },
   } = await application.import({
     globals,
   });
 
-  t.deepEqual(alice, { bluePill: 'undefined', redPill: 'number' });
-  t.deepEqual(bob, { bluePill: 'number', redPill: 'undefined' });
+  t.deepEqual({ alice, bob, carol }, expectations);
 });
 
 const assertFixture = (t, { namespace }) => {
-  const { alice, bob } = namespace;
+  const { alice, bob, carol } = namespace;
 
-  t.deepEqual(alice, { bluePill: 'undefined', redPill: 'number' });
-  t.deepEqual(bob, { bluePill: 'number', redPill: 'undefined' });
+  t.deepEqual({ alice, bob, carol }, expectations);
 };
 
-const fixtureAssertionCount = 2;
+const fixtureAssertionCount = 1;
 
 scaffold(
   'fixture-policy',

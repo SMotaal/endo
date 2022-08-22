@@ -37,7 +37,7 @@ export const parserForLanguage = {
  * @returns {Promise<Application>}
  */
 export const loadLocation = async (readPowers, moduleLocation, options) => {
-  const { moduleTransforms = {}, dev = false } = options || {};
+  const { moduleTransforms = {}, dev = false, policy } = options || {};
 
   const { read } = unpackReadPowers(readPowers);
 
@@ -60,7 +60,7 @@ export const loadLocation = async (readPowers, moduleLocation, options) => {
     tags,
     packageDescriptor,
     moduleSpecifier,
-    { dev },
+    { dev, policy },
   );
 
   /** @type {ExecuteFn} */
@@ -72,7 +72,6 @@ export const loadLocation = async (readPowers, moduleLocation, options) => {
       transforms,
       __shimTransforms__,
       Compartment,
-      policy,
     } = options;
     const makeImportHook = makeImportHookMaker(readPowers, packageLocation);
     const { compartment } = link(compartmentMap, {
@@ -85,7 +84,6 @@ export const loadLocation = async (readPowers, moduleLocation, options) => {
       moduleTransforms,
       __shimTransforms__,
       Compartment,
-      policy,
     });
     return compartment.import(moduleSpecifier);
   };

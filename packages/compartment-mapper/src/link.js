@@ -14,7 +14,7 @@
 
 import { resolve } from './node-module-specifier.js';
 import { parseExtension } from './extension.js';
-import { policyEnforcer } from './policy.js';
+import { getAllowedGlobals } from './policy.js';
 
 const { entries, fromEntries, freeze } = Object;
 const { hasOwnProperty } = Object.prototype;
@@ -341,12 +341,9 @@ export const link = (
     modules: exitModules = {},
     archiveOnly = false,
     Compartment = defaultCompartment,
-    policy = {},
   },
 ) => {
   const { compartment: entryCompartmentName } = entry;
-
-  const policyApi = policyEnforcer(policy);
 
   /** @type {Record<string, Compartment>} */
   const compartments = Object.create(null);
@@ -397,8 +394,11 @@ export const link = (
     );
     const resolveHook = resolve;
     resolvers[compartmentName] = resolve;
-console.log("\n+++++\n", compartmentDescriptor)
-    const personalGlobals = policyApi.getGlobalsFor(name, globals, compartmentDescriptor.policy);
+
+    let personalGlobals = Object.create(null);
+    if (!archiveOnly) {
+      personalGlobals = getAllowedGlobals(globals, compartmentDescriptor.policy);
+    }
 
     const compartment = new Compartment(personalGlobals, undefined, {
       resolveHook,

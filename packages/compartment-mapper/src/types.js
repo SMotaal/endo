@@ -51,6 +51,7 @@ export {};
  * @property {Record<string, ScopeDescriptor>} scopes
  * @property {Record<string, Language>} parsers - language for extension
  * @property {Record<string, Language>} types - language for module specifier
+ * @property {Object} policy - policy specific to compartment
  */
 
 /**
@@ -239,7 +240,6 @@ export {};
  * @property {Array<Transform>} [__shimTransforms__]
  * @property {Record<string, Object>} [modules]
  * @property {Compartment} [Compartment]
- * @property {Object} [policy]
  */
 
 /**

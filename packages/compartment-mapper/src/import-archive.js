@@ -241,7 +241,6 @@ export const parseArchive = async (
     }
   }
   const compartmentMapText = textDecoder.decode(compartmentMapBytes);
-  console.log('\n___________after\n',compartmentMapText)
   const compartmentMap = parseLocatedJson(
     compartmentMapText,
     'compartment-map.json',
@@ -315,7 +314,7 @@ export const parseArchive = async (
       transforms,
       __shimTransforms__,
       Compartment,
-      policy,
+      policy, // TODO: figure out if this makes any sense
     });
     return compartment.import(moduleSpecifier);
   };

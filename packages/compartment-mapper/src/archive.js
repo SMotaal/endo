@@ -299,7 +299,6 @@ const digestLocation = async (powers, moduleLocation, options) => {
     exitModules,
     computeSha512,
   );
-console.log('\n____\n',compartmentMap.compartments)
   // Induce importHook to record all the necessary modules to import the given module specifier.
   const { compartment } = link(compartmentMap, {
     resolve,

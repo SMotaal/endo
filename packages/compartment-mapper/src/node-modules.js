@@ -39,7 +39,7 @@ import { searchDescriptor } from './search.js';
 import { parseLocatedJson } from './json.js';
 import { unpackReadPowers } from './powers.js';
 import { pathCompare } from './compartment-map.js';
-import { policyEnforcer } from './policy.js';
+import { getPolicyFor } from './policy.js';
 
 const { assign, create, keys, values } = Object;
 
@@ -451,6 +451,7 @@ const trace = (graph, location, path) => {
  * @param {Graph} graph
  * @param {Set<string>} tags - build tags about the target environment
  * for selecting relevant exports, e.g., "browser" or "node".
+ * @param {Object} policy
  * @returns {CompartmentMapDescriptor}
  */
 const translateGraph = (
@@ -462,8 +463,6 @@ const translateGraph = (
 ) => {
   /** @type {Record<string, CompartmentDescriptor>} */
   const compartments = Object.create(null);
-
-  const policyApi = policyEnforcer(policy);
 
   // For each package, build a map of all the external modules the package can
   // import from other packages.
@@ -508,7 +507,6 @@ const translateGraph = (
       const packageLocation = dependencies[dependencyName];
       digest(dependencyName, packageLocation);
     }
-    const localPolicy = policyApi.getPolicyFor(name);
 
     compartments[packageLocation] = {
       label,
@@ -519,7 +517,7 @@ const translateGraph = (
       scopes,
       parsers,
       types,
-      policy: localPolicy
+      policy: getPolicyFor(packageLocation, policy),
     };
   }
 
@@ -541,6 +539,7 @@ const translateGraph = (
  * @param {string} moduleSpecifier
  * @param {Object} [options]
  * @param {boolean} [options.dev]
+ * @param {Object} [options.policy]
  * @returns {Promise<CompartmentMapDescriptor>}
  */
 export const compartmentMapForNodeModules = async (

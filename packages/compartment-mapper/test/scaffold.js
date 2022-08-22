@@ -58,7 +58,12 @@ export function scaffold(
   fixture,
   assertFixture,
   fixtureAssertionCount,
-  { onError, shouldFailBeforeArchiveOperations = false, addGlobals = {}, policy = {} } = {},
+  {
+    onError,
+    shouldFailBeforeArchiveOperations = false,
+    addGlobals = {},
+    policy,
+  } = {},
 ) {
   // wrapping each time allows for convenient use of test.only
   const wrap = (testFunc, testCategoryHint) => (title, implementation) => {
@@ -88,10 +93,10 @@ export function scaffold(
 
     const application = await loadLocation(readPowers, fixture, {
       dev: true,
+      policy,
     });
     const { namespace } = await application.import({
       globals: { ...globals, ...addGlobals },
-      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -121,6 +126,7 @@ export function scaffold(
     const archive = await makeArchive(readPowers, fixture, {
       modules,
       dev: true,
+      policy,
     });
     const application = await parseArchive(archive, '<unknown>', {
       modules: Object.fromEntries(
@@ -135,7 +141,6 @@ export function scaffold(
     });
     const { namespace } = await application.import({
       globals: { ...globals, ...addGlobals },
-      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -153,6 +158,7 @@ export function scaffold(
       const archive = await makeArchive(readPowers, fixture, {
         modules,
         dev: true,
+        policy,
       });
       const prefixArchive = new Uint8Array(archive.length + 10);
       prefixArchive.set(archive, 10);
@@ -163,7 +169,6 @@ export function scaffold(
       });
       const { namespace } = await application.import({
         globals: { ...globals, ...addGlobals },
-        policy,
         globalLexicals,
         modules,
         Compartment,
@@ -190,6 +195,7 @@ export function scaffold(
     await writeArchive(fakeWrite, readPowers, 'app.agar', fixture, {
       modules: { builtin: true },
       dev: true,
+      policy,
     });
     const application = await loadArchive(fakeRead, 'app.agar', {
       modules,
@@ -197,7 +203,6 @@ export function scaffold(
     });
     const { namespace } = await application.import({
       globals: { ...globals, ...addGlobals },
-      policy,
       globalLexicals,
       modules,
       Compartment,
@@ -221,12 +226,12 @@ export function scaffold(
     };
 
     await writeArchive(fakeWrite, readPowers, 'app.agar', fixture, {
+      policy,
       modules,
       dev: true,
     });
     const { namespace } = await importArchive(fakeRead, 'app.agar', {
       globals: { ...globals, ...addGlobals },
-      policy,
       globalLexicals,
       modules,
       Compartment,
