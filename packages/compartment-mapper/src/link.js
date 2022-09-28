@@ -14,7 +14,7 @@
 
 import { resolve } from './node-module-specifier.js';
 import { parseExtension } from './extension.js';
-import { getAllowedGlobals } from './policy.js';
+import { getAllowedGlobals, gatekeepModuleAccess, attenuateModule } from './policy.js';
 
 const { entries, fromEntries, freeze } = Object;
 const { hasOwnProperty } = Object.prototype;
@@ -224,6 +224,9 @@ const makeModuleMapHook = (
         // Policies should be able to allow third-party modules to exit to
         // built-ins explicitly, or have built-ins subverted by modules from
         // specific compartments.
+        gatekeepModuleAccess(moduleSpecifier, compartmentDescriptor.policy, {
+          exit: true,
+        });
         const module = exitModules[exit];
         if (module === undefined) {
           throw new Error(
@@ -235,10 +238,19 @@ const makeModuleMapHook = (
         if (archiveOnly) {
           return inertModuleNamespace;
         } else {
-          return module;
+          return attenuateModule(
+            exit,
+            module,
+            compartmentDescriptor.policy,
+            exitModules,
+          );
         }
       }
       if (foreignModuleSpecifier !== undefined) {
+        gatekeepModuleAccess(moduleSpecifier, compartmentDescriptor.policy, {
+          exit: false,
+        });
+
         const foreignCompartment = compartments[foreignCompartmentName];
         if (foreignCompartment === undefined) {
           throw new Error(
@@ -250,6 +262,10 @@ const makeModuleMapHook = (
         return foreignCompartment.module(foreignModuleSpecifier);
       }
     } else if (has(exitModules, moduleSpecifier)) {
+      gatekeepModuleAccess(moduleSpecifier, compartmentDescriptor.policy, {
+        exit: true,
+      });
+
       // When linking off the filesystem as with `importLocation`,
       // there isn't a module descriptor for every module.
       // TODO grant access to built-in modules contingent on a policy in the
@@ -258,7 +274,12 @@ const makeModuleMapHook = (
       if (archiveOnly) {
         return inertModuleNamespace;
       } else {
-        return exitModules[moduleSpecifier];
+        return attenuateModule(
+          moduleSpecifier,
+          exitModules[moduleSpecifier],
+          compartmentDescriptor.policy,
+          exitModules,
+        );
       }
     }
 
@@ -272,6 +293,8 @@ const makeModuleMapHook = (
         moduleSpecifier,
         scopePrefix,
       );
+
+      // TODO: figure out gatekeepModuleAccess params for this
 
       if (foreignModuleSpecifier !== undefined) {
         const { compartment: foreignCompartmentName } = scopeDescriptor;
@@ -397,7 +420,10 @@ export const link = (
 
     let personalGlobals = Object.create(null);
     if (!archiveOnly) {
-      personalGlobals = getAllowedGlobals(globals, compartmentDescriptor.policy);
+      personalGlobals = getAllowedGlobals(
+        globals,
+        compartmentDescriptor.policy,
+      );
     }
 
     const compartment = new Compartment(personalGlobals, undefined, {

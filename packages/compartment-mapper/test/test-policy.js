@@ -24,7 +24,10 @@ const policy = {
       globals: {
         bluePill: true,
       },
-      packages: {},
+      packages: {
+        alice: true,
+        carol: true,
+      },
     },
     alice: {
       globals: {

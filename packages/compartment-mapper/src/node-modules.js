@@ -210,6 +210,61 @@ const inferParsers = (descriptor, location) => {
   return { ...commonParsers, ...additionalParsers };
 };
 
+// for package logical path names
+function comparePreferredPackageName(a, b) {
+  // prefer shorter package names
+  if (a.length > b.length) {
+    return 1;
+  } else if (a.length < b.length) {
+    return -1;
+  }
+  // as a tie breaker, prefer alphabetical order
+  if (a < b) {
+    return -1;
+  } else if (a > b) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+// for comparing package logical path arrays (shorter is better)
+function comparePackageLogicalPaths(aPath, bPath) {
+  // undefined is not preferred
+  if (aPath === undefined && bPath === undefined) {
+    return 0;
+  }
+  if (aPath === undefined) {
+    return 1;
+  }
+  if (bPath === undefined) {
+    return -1;
+  }
+  // shortest path by part count is preferred
+  if (aPath.length > bPath.length) {
+    return 1;
+  } else if (aPath.length < bPath.length) {
+    return -1;
+  }
+  // as a tie breaker, prefer path ordered by preferred package names
+  // iterate parts:
+  //   if a is better than b -> yes
+  //   if worse -> no
+  //   if same -> continue
+  for (let index = 0; index < aPath.length; index += 1) {
+    const a = aPath[index];
+    const b = bPath[index];
+    const comparison = comparePreferredPackageName(a, b);
+    if (comparison === 0) {
+      // eslint-disable-next-line no-continue
+      continue;
+    } else {
+      return comparison;
+    }
+  }
+  return 0;
+}
+
 /**
  * graphPackage and gatherDependency are mutually recursive functions that
  * gather the metadata for a package and its transitive dependencies.
@@ -237,6 +292,8 @@ const graphPackage = async (
   { packageLocation, packageDescriptor },
   tags,
   dev,
+  logicalPath = [],
+  preferredPackageLogicalPathMap,
 ) => {
   if (graph[packageLocation] !== undefined) {
     // Returning the promise here would create a causal cycle and stall recursion.
@@ -260,6 +317,8 @@ const graphPackage = async (
     assign(predicates, packageDescriptor.devDependencies || {});
   }
   for (const name of keys(predicates).sort()) {
+    const childLogicalPath = [...logicalPath, name];
+
     children.push(
       // Mutual recursion ahead:
       // eslint-disable-next-line no-use-before-define
@@ -271,6 +330,8 @@ const graphPackage = async (
         packageLocation,
         name,
         tags,
+        childLogicalPath,
+        preferredPackageLogicalPathMap,
       ),
     );
   }
@@ -289,6 +350,7 @@ const graphPackage = async (
   Object.assign(result, {
     name,
     path: undefined,
+    logicalPath,
     label: `${name}${version ? `-v${version}` : ''}`,
     explicit: exports !== undefined,
     exports: inferExports(packageDescriptor, tags, types),
@@ -327,6 +389,8 @@ const gatherDependency = async (
   packageLocation,
   name,
   tags,
+  childLogicalPath = [],
+  preferredPackageLogicalPathMap,
 ) => {
   const dependency = await findPackage(
     readDescriptor,
@@ -338,6 +402,15 @@ const gatherDependency = async (
     throw new Error(`Cannot find dependency ${name} for ${packageLocation}`);
   }
   dependencies[name] = dependency.packageLocation;
+  const theCurrentBest = preferredPackageLogicalPathMap.get(
+    dependency.packageLocation,
+  );
+  if (comparePackageLogicalPaths(childLogicalPath, theCurrentBest) < 0) {
+    preferredPackageLogicalPathMap.set(
+      dependency.packageLocation,
+      childLogicalPath,
+    );
+  }
   await graphPackage(
     name,
     readDescriptor,
@@ -346,6 +419,8 @@ const gatherDependency = async (
     dependency,
     tags,
     false,
+    childLogicalPath,
+    preferredPackageLogicalPathMap,
   );
 };
 
@@ -399,6 +474,7 @@ const graphPackages = async (
       `Cannot find package.json for application at ${packageLocation}`,
     );
   }
+  const preferredPackageLogicalPathMap = new Map();
   const graph = create(null);
   await graphPackage(
     packageDescriptor.name,
@@ -411,6 +487,8 @@ const graphPackages = async (
     },
     tags,
     dev,
+    undefined,
+    preferredPackageLogicalPathMap,
   );
   return graph;
 };
@@ -437,6 +515,12 @@ const trace = (graph, location, path) => {
     return;
   }
   node.path = path;
+  if (path.join() !== node.logicalPath.join()) {
+    console.log(`<dependency identifier algos differ> 
+    < ${path.join('>')}
+    > ${node.logicalPath.join('>')}
+    ${location}`);
+  }
   for (const name of keys(node.dependencies)) {
     trace(graph, node.dependencies[name], [...path, name]);
   }
@@ -508,6 +592,11 @@ const translateGraph = (
       digest(dependencyName, packageLocation);
     }
 
+    const packagePolicy = getPolicyFor(
+      packageLocation === entryPackageLocation ? name : packageLocation,
+      policy,
+    );
+
     compartments[packageLocation] = {
       label,
       name,
@@ -517,7 +606,7 @@ const translateGraph = (
       scopes,
       parsers,
       types,
-      policy: getPolicyFor(packageLocation, policy),
+      policy: packagePolicy,
     };
   }
 
@@ -562,6 +651,8 @@ export const compartmentMapForNodeModules = async (
   );
 
   trace(graph, packageLocation, []);
+
+  // console.log(graph)
 
   const compartmentMap = translateGraph(
     packageLocation,

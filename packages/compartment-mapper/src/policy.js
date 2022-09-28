@@ -39,9 +39,11 @@ export const getPolicyFor = (id, policy) => {
   if (!policy) {
     return undefined;
   }
-  if (policy.resources && policy.resources[adaptId(id)]) {
-    return policy.resources[adaptId(id)];
+  const shortId = adaptId(id);
+  if (policy.resources && policy.resources[shortId]) {
+    return policy.resources[shortId];
   } else {
+    console.warn(`No policy for '${shortId}'`);
     return {};
   }
 };
@@ -55,10 +57,98 @@ const getGlobalsList = myPolicy => {
     .map(([k, _v]) => k);
 };
 
+/**
+ * Filters available globals and returns a copy according to the policy
+ *
+ * @param {Object} globals
+ * @param {Object} localPolicy
+ * @returns {Object} limitedGlobals
+ */
 export const getAllowedGlobals = (globals, localPolicy) => {
   if (!localPolicy) {
     return globals;
   }
   const list = getGlobalsList(localPolicy);
   return copyGlobals(globals, list);
+};
+
+/**
+ * Throws if importing of the specifier is not allowed by the policy
+ *
+ * @param {string} specifier
+ * @param {Object} policy
+ * @param {Object} [info]
+ */
+export const gatekeepModuleAccess = (specifier, policy, info) => {
+  const policyChoice = info.exit ? 'builtin' : 'packages';
+  if (policy && (!policy[policyChoice] || !policy[policyChoice][specifier])) {
+    console.trace(specifier);
+    throw Error(
+      `Importing '${specifier}' was not allowed by policy ${policyChoice}:${JSON.stringify(
+        policy[policyChoice],
+      )}`,
+    );
+  }
+};
+
+const attenuations = new Map();
+const attenuationsCompartment = new Compartment(
+  {}, // should attenuations have access to all globals or no globals?
+  {},
+  {
+    name: 'attenuations-compartment',
+    resolveHook: moduleSpecifier => moduleSpecifier,
+    importHook: async specifier => {
+      const ns = attenuations.get(specifier)();
+      attenuations.delete(specifier); // free memory and ensure specificattenuations are not reused
+      const staticModuleRecord = Object.freeze({
+        imports: [],
+        exports: Object.keys(ns),
+        execute: moduleExports => {
+          Object.assign(moduleExports, ns);
+        },
+      });
+      return staticModuleRecord;
+    },
+  },
+);
+
+/**
+ * Throws if importing of the specifier is not allowed by the policy
+ *
+ * @param {string} specifier - exit module name
+ * @param {Object} originalModule - reference to the exit module
+ * @param {Object} policy - local compartment policy
+ * @param {Object} modules - exitModules where attenuations can be found
+ */
+export const attenuateModule = (specifier, originalModule, policy, modules) => {
+  if (policy && (!policy.builtin || !policy.builtin[specifier])) {
+    console.trace(specifier);
+    throw Error(
+      `Attenuation failed '${specifier}' was not in policy builtin:${JSON.stringify(
+        policy.builtin,
+      )}`,
+    );
+  }
+  if (!policy || policy.builtin[specifier] === true) {
+    return originalModule;
+  }
+
+  // TODO: add checks to validate shape
+
+  const attenuationName = policy.builtin[specifier].attenuate;
+  console.log(modules[attenuationName], policy.builtin[specifier]);
+  // TODO: the only reason this can't be a symbol is a typeof check in Compartment#module
+  // We could also create a new compartment for each attenuation use but that seems a waste of resources
+  const whatevs = Math.random().toFixed(10);
+  attenuations.set(whatevs, () => {
+    return modules[attenuationName].attenuate(
+      policy.builtin[specifier].params,
+      originalModule,
+    );
+  });
+
+  const ns = attenuationsCompartment.module(whatevs);
+
+  return ns;
 };

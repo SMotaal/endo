@@ -296,7 +296,6 @@ export const parseArchive = async (
       transforms,
       __shimTransforms__,
       Compartment,
-      policy,
     } = options || {};
     const makeImportHook = makeArchiveImportHookMaker(
       get,
@@ -314,7 +313,6 @@ export const parseArchive = async (
       transforms,
       __shimTransforms__,
       Compartment,
-      policy, // TODO: figure out if this makes any sense
     });
     return compartment.import(moduleSpecifier);
   };
