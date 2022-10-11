@@ -126,7 +126,7 @@ export const CompartmentPrototype = {
   },
 
   module(specifier) {
-    if (typeof specifier !== 'string') {
+    if (typeof specifier !== 'string' && typeof specifier !== 'symbol') {
       throw new TypeError('first argument of module() must be a string');
     }
 

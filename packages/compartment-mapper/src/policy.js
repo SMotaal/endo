@@ -98,9 +98,9 @@ const attenuationsCompartment = new Compartment(
   {
     name: 'attenuations-compartment',
     resolveHook: moduleSpecifier => moduleSpecifier,
-    importHook: async specifier => {
-      const ns = attenuations.get(specifier)();
-      attenuations.delete(specifier); // free memory and ensure specificattenuations are not reused
+    importHook: async oneTimeIdentifier => {
+      const ns = attenuations.get(oneTimeIdentifier)();
+      attenuations.delete(oneTimeIdentifier); // free memory and ensure specific attenuations are not reused
       const staticModuleRecord = Object.freeze({
         imports: [],
         exports: Object.keys(ns),
@@ -119,9 +119,9 @@ const attenuationsCompartment = new Compartment(
  * @param {string} specifier - exit module name
  * @param {Object} originalModule - reference to the exit module
  * @param {Object} policy - local compartment policy
- * @param {Object} modules - exitModules where attenuations can be found
+ * @param {Object} attenuationsImpl - a key-value where attenuations can be found
  */
-export const attenuateModule = (specifier, originalModule, policy, modules) => {
+export const attenuateModule = (specifier, originalModule, policy, attenuationsImpl) => {
   if (policy && (!policy.builtin || !policy.builtin[specifier])) {
     console.trace(specifier);
     throw Error(
@@ -137,18 +137,17 @@ export const attenuateModule = (specifier, originalModule, policy, modules) => {
   // TODO: add checks to validate shape
 
   const attenuationName = policy.builtin[specifier].attenuate;
-  console.log(modules[attenuationName], policy.builtin[specifier]);
-  // TODO: the only reason this can't be a symbol is a typeof check in Compartment#module
+  // Fixed: the only reason this can't be a symbol is a typeof check in Compartment#module
   // We could also create a new compartment for each attenuation use but that seems a waste of resources
-  const whatevs = Math.random().toFixed(10);
-  attenuations.set(whatevs, () => {
-    return modules[attenuationName].attenuate(
+  const oneTimeIdentifier = Symbol('attenuation');
+  attenuations.set(oneTimeIdentifier, () => {
+    return attenuationsImpl[attenuationName].attenuate(
       policy.builtin[specifier].params,
       originalModule,
     );
   });
 
-  const ns = attenuationsCompartment.module(whatevs);
+  const ns = attenuationsCompartment.module(oneTimeIdentifier);
 
   return ns;
 };

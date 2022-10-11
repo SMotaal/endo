@@ -193,6 +193,7 @@ const trimModuleSpecifierPrefix = (moduleSpecifier, prefix) => {
  * @param {Record<string, ModuleDescriptor>} moduleDescriptors
  * @param {Record<string, ModuleDescriptor>} scopeDescriptors
  * @param {Record<string, string>} exitModules
+ * @param {Record<string, Object>} attenuations
  * @param {boolean} archiveOnly
  * @returns {ModuleMapHook | undefined}
  */
@@ -203,6 +204,7 @@ const makeModuleMapHook = (
   moduleDescriptors,
   scopeDescriptors,
   exitModules,
+  attenuations,
   archiveOnly,
 ) => {
   /**
@@ -242,7 +244,7 @@ const makeModuleMapHook = (
             exit,
             module,
             compartmentDescriptor.policy,
-            exitModules,
+            attenuations,
           );
         }
       }
@@ -278,7 +280,7 @@ const makeModuleMapHook = (
           moduleSpecifier,
           exitModules[moduleSpecifier],
           compartmentDescriptor.policy,
-          exitModules,
+          attenuations,
         );
       }
     }
@@ -362,6 +364,7 @@ export const link = (
     moduleTransforms = {},
     __shimTransforms__ = [],
     modules: exitModules = {},
+    attenuations,
     archiveOnly = false,
     Compartment = defaultCompartment,
   },
@@ -413,6 +416,7 @@ export const link = (
       modules,
       scopes,
       exitModules,
+      attenuations,
       archiveOnly,
     );
     const resolveHook = resolve;

@@ -239,6 +239,7 @@ export {};
  * @property {Array<Transform>} [transforms]
  * @property {Array<Transform>} [__shimTransforms__]
  * @property {Record<string, Object>} [modules]
+ * @property {Record<string, Object>} [attenuations]
  * @property {Compartment} [Compartment]
  */
 
