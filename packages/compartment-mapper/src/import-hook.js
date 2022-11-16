@@ -52,6 +52,7 @@ function getImportsFromRecord(record) {
  * @param {Record<string, CompartmentDescriptor>} compartments
  * @param {Record<string, any>} exitModules
  * @param {HashFn=} computeSha512
+ * @param {string|undefined} packageMainExport
  * @returns {ImportHookMaker}
  */
 export const makeImportHookMaker = (
@@ -61,6 +62,7 @@ export const makeImportHookMaker = (
   compartments = Object.create(null),
   exitModules = Object.create(null),
   computeSha512 = undefined,
+  packageMainExport = undefined,
 ) => {
   // Set of specifiers for modules whose parser is not using heuristics to determine imports
   const strictlyRequired = new Set();
@@ -144,6 +146,10 @@ export const makeImportHookMaker = (
       const candidates = [];
       if (moduleSpecifier === '.') {
         candidates.push('./index.js');
+        // https://github.com/endojs/endo/issues/1363
+        if (packageMainExport) {
+          candidates.push(packageMainExport);
+        }
       } else {
         candidates.push(moduleSpecifier);
         if (parseExtension(moduleSpecifier) === '') {
