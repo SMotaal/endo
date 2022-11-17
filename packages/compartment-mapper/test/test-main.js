@@ -180,7 +180,9 @@ scaffold(
     t.is(namespace.answer2, 200, 'correct exports');
     t.is(namespace.answer3, 200, 'correct exports');
     t.is(namespace.answer4, 200, 'correct exports');
+    t.is(namespace.answer5, 200, 'correct exports');
+    t.is(namespace.answer6, 200, 'correct exports');
   },
-  4,
+  6,
   { tags: new Set(['browser']) },
 );
