@@ -9,21 +9,33 @@ const { isArray } = Array;
 
 /**
  * @param {string} name - the name of the referrer package.
- * @param {Object} exports - the `exports` field from a package.json
+ * @param {Object} browser - the `browser` field from a package.json
  * @yields {[string, string]}
  */
-function* interpretBrowserExports(name, exports) {
-  if (typeof exports === 'string') {
-    yield [name, relativize(exports)];
+function* interpretBrowserExports(name, browser) {
+  if (typeof browser === 'string') {
+    yield [name, relativize(browser)];
     return;
   }
-  if (Object(exports) !== exports) {
+  if (Object(browser) !== browser) {
     throw new Error(
-      `Cannot interpret package.json browser property for package ${name}, must be string or object, got ${exports}`,
+      `Cannot interpret package.json browser property for package ${name}, must be string or object, got ${browser}`,
     );
   }
-  for (const [key, value] of entries(exports)) {
-    yield [join(name, key), relativize(value)];
+  for (const [key, value] of entries(browser)) {
+    // https://github.com/defunctzombie/package-browser-field-spec#ignore-a-module
+    if (value === false) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+    // https://github.com/defunctzombie/package-browser-field-spec#replace-specific-files---advanced
+    if (key.startsWith('./') || key === '.') {
+      // local module replace
+      yield [join(name, key), relativize(value)];
+    } else {
+      // dependency replace
+      yield [key, relativize(value)];
+    }
   }
 }
 
@@ -99,10 +111,11 @@ export const inferExportsEntries = function* inferExportsEntries(
     const spec = relativize(module);
     types[spec] = 'mjs';
     yield [name, spec];
-  } else if (browser !== undefined && tags.has('browser')) {
-    yield* interpretBrowserExports(name, browser);
   } else if (main !== undefined) {
     yield [name, relativize(main)];
+  }
+  if (browser !== undefined && tags.has('browser')) {
+    yield* interpretBrowserExports(name, browser);
   }
   if (exports !== undefined) {
     yield* interpretExports(name, exports, tags);

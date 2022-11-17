@@ -167,3 +167,20 @@ test('no transitive dev dependencies', async t => {
     },
   );
 });
+
+scaffold(
+  'fixtures-resolve/browser',
+  test,
+  new URL(
+    'fixtures-resolve/node_modules/browser/main.js',
+    import.meta.url,
+  ).toString(),
+  (t, { namespace }) => {
+    t.is(namespace.answer1, 200, 'correct exports');
+    t.is(namespace.answer2, 200, 'correct exports');
+    t.is(namespace.answer3, 200, 'correct exports');
+    t.is(namespace.answer4, 200, 'correct exports');
+  },
+  4,
+  { tags: new Set(['browser']) },
+);
