@@ -42,7 +42,8 @@ function* interpretBrowserExports(name, browser, main = 'index.js') {
       yield [join(name, key), relativize(value)];
     } else {
       // dependency replace
-      yield [key, relativize(value)];
+      // yield [key, value];
+      // TODO: handle elsewhere?
     }
   }
 }
