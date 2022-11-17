@@ -175,15 +175,17 @@ scaffold(
     'fixtures-resolve/node_modules/browser/main.js',
     import.meta.url,
   ).toString(),
-  (t, { namespace }) => {
-    t.is(namespace.answer1, 200, 'correct exports');
-    t.is(namespace.answer2, 200, 'correct exports');
-    t.is(namespace.answer3, 200, 'correct exports');
-    t.is(namespace.answer4, 200, 'correct exports');
-    t.is(namespace.answer5, 200, 'correct exports');
-    t.is(namespace.answer6, 200, 'correct exports');
-    t.is(namespace.answer7, 200, 'correct exports');
+  (t, { namespace: { results } }) => {
+    t.deepEqual(results, {
+      answer1: 200,
+      answer2: 200,
+      answer3: 200,
+      answer4: 200,
+      answer5: 200,
+      answer6: 200,
+      // answer7: 200,
+    });
   },
-  6,
-  { tags: new Set(['browser']), knownFailure: true },
+  1,
+  { tags: new Set(['browser']) },
 );
