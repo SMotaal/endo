@@ -316,7 +316,7 @@ export const makeEncodePassable = ({
   encodeError = (err, _) => assert.fail(X`error unexpected: ${err}`),
 } = {}) => {
   const encodePassable = passable => {
-    if (ErrorHelper.canBeValid(passable, x => x)) {
+    if (ErrorHelper.canBeValid(passable)) {
       return encodeError(passable, encodePassable);
     }
     const passStyle = passStyleOf(passable);
