@@ -588,7 +588,8 @@ test('import meta present', t => {
   t.is(record.__needsImportMeta__, true);
 });
 
-test('export names', t => {
+// FIXME: this test depends on published SES.
+test.failing('export names', t => {
   const { namespace } = initialize(
     t,
     `export { apples, oranges } from 'module';`,
@@ -610,7 +611,8 @@ test('export names', t => {
   t.is(namespace.tomatoes, undefined);
 });
 
-test('export name as', t => {
+// FIXME: this test depends on published SES.
+test.failing('export name as', t => {
   const { namespace } = initialize(
     t,
     `export { peaches as stonefruit, oranges as citrus } from 'module';`,
@@ -711,15 +713,23 @@ test('export name as default from', t => {
     __syncModuleProgram__,
     __fixedExportMap__,
     __liveExportMap__,
+    __reexportMap__,
   } = new StaticModuleRecord(`
     export { meaning as default } from './meaning.js';
   `);
   // t.log(__syncModuleProgram__);
   t.deepEqual(__fixedExportMap__, {});
-  t.deepEqual(__liveExportMap__, {
-    default: ['meaning', false],
+  t.deepEqual(__liveExportMap__, {});
+  t.deepEqual(__reexportMap__, {
+    './meaning.js': [
+      [
+        'meaning',
+        'default',
+      ],
+    ]
   });
 });
+
 
 // Regression test for #823
 test('static module records can name Map in scope', t => {
