@@ -69,8 +69,14 @@ export interface RedirectStaticModuleInterface {
   importMeta?: any;
 }
 
+export interface AliasModuleInterface {
+  alias: string;
+  compartment: Compartment;
+}
+
 export type StaticModuleType =
   | RedirectStaticModuleInterface
+  | AliasModuleInterface
   | FinalStaticModuleType;
 
 export type ModuleExportsNamespace = Record<string, any>;

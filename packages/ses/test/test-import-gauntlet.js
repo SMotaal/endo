@@ -256,3 +256,43 @@ test('export name as default', async t => {
 
   await compartment.import('./main.js');
 });
+
+test('importHook returning an AliasModuleInterface', async t => {
+  t.plan(1);
+
+  const makeImportHook = makeNodeImporter({
+    'https://example.com/alias-target.js': `
+      const meaning = 42;
+      export { meaning as default };
+    `,
+    'https://example.com/main.js': `
+      import meaning from './meaning.js';
+      t.is(meaning, 42);
+    `,
+  });
+  const importHook = makeImportHook('https://example.com');
+  const aliasRegistry = {
+    './meaning.js': './alias-target.js',
+  };
+
+  const compartment = new Compartment(
+    { t },
+    {},
+    {
+      resolveHook: resolveNode,
+      importHook: async moduleSpecifier => {
+        const aliasTarget = aliasRegistry[moduleSpecifier];
+        if (aliasTarget) {
+          const record = {
+            alias: aliasTarget,
+            compartment,
+          };
+          return record;
+        }
+        return importHook(moduleSpecifier);
+      },
+    },
+  );
+
+  await compartment.import('./main.js');
+});

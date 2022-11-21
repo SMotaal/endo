@@ -175,6 +175,22 @@ const loadWithoutErrorAnnotation = async (
     )} in compartment ${q(compartment.name)}`;
   }
 
+  if (staticModuleRecord.alias !== undefined) {
+    // Behold: recursion.
+    // eslint-disable-next-line no-use-before-define
+    const aliasRecord = await memoizedLoadWithErrorAnnotation(
+      compartmentPrivateFields,
+      moduleAliases,
+      staticModuleRecord.compartment,
+      staticModuleRecord.alias,
+      pendingJobs,
+      moduleLoads,
+      errors,
+    );
+    mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+    return aliasRecord;
+  }
+
   if (staticModuleRecord.record !== undefined) {
     const {
       compartment: aliasCompartment = compartment,
