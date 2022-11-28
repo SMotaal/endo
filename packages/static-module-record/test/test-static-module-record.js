@@ -154,6 +154,16 @@ function initialize(t, source, options = {}) {
         }
       }
     }
+    for (const [module, items] of Object.entries(record.__reexportMap__)) {
+      const moduleImports = imports.get(module);
+      if (moduleImports === undefined) {
+        t.fail(`link error for named reexports from module ${module}`);
+      } else {
+        for (const [localName, exportedName] of items) {
+          namespace[exportedName] = moduleImports.get(localName);
+        }
+      }
+    }
   }
 
   functor({
@@ -588,8 +598,7 @@ test('import meta present', t => {
   t.is(record.__needsImportMeta__, true);
 });
 
-// FIXME: this test depends on published SES.
-test.failing('export names', t => {
+test('export names', t => {
   const { namespace } = initialize(
     t,
     `export { apples, oranges } from 'module';`,
@@ -611,8 +620,7 @@ test.failing('export names', t => {
   t.is(namespace.tomatoes, undefined);
 });
 
-// FIXME: this test depends on published SES.
-test.failing('export name as', t => {
+test('export name as', t => {
   const { namespace } = initialize(
     t,
     `export { peaches as stonefruit, oranges as citrus } from 'module';`,
@@ -629,7 +637,6 @@ test.failing('export name as', t => {
       ]),
     },
   );
-  t.log(namespace);
   t.is(namespace.stonefruit, 'stonefruit');
   t.is(namespace.citrus, 'citrus');
   t.is(namespace.peaches, undefined);
