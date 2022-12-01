@@ -41,11 +41,17 @@ const expectedLog = [
     green: '#0f0',
     blue: '#00f',
   },
+  {
+    default: {
+      zzz: 1,
+    },
+    zzz: 1,
+  },
 ];
 
-test('bundles work', async t => {
+test.only('bundles work', async t => {
   const bundle = await makeBundle(read, fixture);
-  // t.log(bundle);
+  fs.writeFileSync('./b.js', bundle);
   const log = [];
   const print = entry => {
     log.push(entry);

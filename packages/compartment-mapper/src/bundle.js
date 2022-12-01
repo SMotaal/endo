@@ -216,19 +216,19 @@ export const makeBundle = async (read, moduleLocation, options) => {
   }
 
   // Only support mjs format.
-  const problems = modules
-    .filter(module => module.parser !== 'pre-mjs-json')
-    .map(
-      ({ moduleSpecifier, compartmentName, parser }) =>
-        `module ${moduleSpecifier} in compartment ${compartmentName} in language ${parser}`,
-    );
-  if (problems.length) {
-    throw new Error(
-      `Can only bundle applications that only have ESM (.mjs-type) modules, got ${problems.join(
-        ', ',
-      )}`,
-    );
-  }
+  // const problems = modules
+  //   .filter(module => module.parser !== 'pre-mjs-json')
+  //   .map(
+  //     ({ moduleSpecifier, compartmentName, parser }) =>
+  //       `module ${moduleSpecifier} in compartment ${compartmentName} in language ${parser}`,
+  //   );
+  // if (problems.length) {
+  //   throw new Error(
+  //     `Can only bundle applications that only have ESM (.mjs-type) modules, got ${problems.join(
+  //       ', ',
+  //     )}`,
+  //   );
+  // }
 
   const exportsCellRecord = exportMap =>
     ''.concat(
