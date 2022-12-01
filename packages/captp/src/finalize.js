@@ -47,11 +47,11 @@ export const makeFinalizingMap = finalizer => {
   const keyToRef = new Map();
   if (!WeakRef || !FinalizationRegistry) {
     return Far('fakeFinalizingMap', {
-      clearWithoutFinalizing: keyToRef.clear,
-      get: keyToRef.get,
-      has: keyToRef.has,
-      set: keyToRef.set,
-      delete: keyToRef.delete,
+      clearWithoutFinalizing: keyToRef.clear.bind(keyToRef),
+      get: keyToRef.get.bind(keyToRef),
+      has: keyToRef.has.bind(keyToRef),
+      set: keyToRef.set.bind(keyToRef),
+      delete: keyToRef.delete.bind(keyToRef),
       getSize: () => keyToRef.size,
     });
   }

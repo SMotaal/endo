@@ -380,7 +380,7 @@ export const makeCapTP = (
       const s = Far('settler', {
         resolve,
         reject,
-        resolveWithPresence,
+        resolveWithPresence: () => resolveWithPresence(handler),
       });
       settler = s;
     };
