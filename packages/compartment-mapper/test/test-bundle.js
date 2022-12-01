@@ -57,6 +57,7 @@ test.only('bundles work', async t => {
     log.push(entry);
   };
   const compartment = new Compartment({ print });
+  console.log('--------------------------------------------------------')
   compartment.evaluate(bundle);
   t.deepEqual(log, expectedLog);
 });

@@ -42,6 +42,8 @@ export const parsePreCjs = async (
     afterExecute();
   };
 
+  const syncModuleProgram = `${source}//# sourceURL=${location}\n`;
+
   return {
     parser: 'pre-cjs-json',
     bytes,
@@ -50,6 +52,7 @@ export const parsePreCjs = async (
       reexports,
       exports,
       execute,
+      __syncModuleProgram__: syncModuleProgram,
     },
   };
 };

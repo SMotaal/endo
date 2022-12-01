@@ -284,7 +284,7 @@ ${__syncModuleProgram__},
 ${''.concat(
   ...modules.map(
     ({
-      record: { __fixedExportMap__, __liveExportMap__, __reexportMap__ },
+      record: { __fixedExportMap__ = {}, __liveExportMap__ = {}, __reexportMap__ = {} },
     }) => `\
     {
 ${exportsCellRecord(__fixedExportMap__)}${exportsCellRecord(
@@ -298,7 +298,7 @@ ${exportsCellRecord(__fixedExportMap__)}${exportsCellRecord(
 
 ${''.concat(
   ...modules.flatMap(
-    ({ index, indexedImports, record: { reexports, __reexportMap__ } }) => {
+    ({ index, indexedImports, record: { reexports, __reexportMap__ = {} } }) => {
       const mappings = reexports.map(
         importSpecifier => `\
   Object.defineProperties(cells[${index}], Object.getOwnPropertyDescriptors(cells[${indexedImports[importSpecifier]}]));
@@ -348,7 +348,7 @@ ${''.concat(
     ({
       index,
       indexedImports,
-      record: { __liveExportMap__, __fixedExportMap__ },
+      record: { __liveExportMap__ = {}, __fixedExportMap__ = {} },
     }) => `\
   functors[${index}]({
     imports(entries) {

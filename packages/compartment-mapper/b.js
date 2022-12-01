@@ -2,6 +2,11 @@
 (() => {
   const functors = [
 // === functors[0] ===
+(function (require, exports, module, __filename, __dirname) { module.exports = { zzz:1 } //*/
+})
+//# sourceURL=file:///home/xyz/Development/endo/packages/compartment-mapper/test/fixtures-0/node_modules/bundle/icando.cjs
+,
+// === functors[1] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const        c=  'sea';$h‍_once.c(c);
 const        i=  'eye';$h‍_once.i(i);
 const        k=  'que';$h‍_once.k(k);
@@ -10,48 +15,48 @@ const        u=  'you';$h‍_once.u(u);
 const        y=  'why';$h‍_once.y(y);
 })
 ,
-// === functors[1] ===
+// === functors[2] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const{default:$c‍_default}={default:'foo'};$h‍_once.default($c‍_default);
 })
 ,
-// === functors[2] ===
+// === functors[3] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const        color=  'blue';$h‍_once.color(color);
 })
 ,
-// === functors[3] ===
+// === functors[4] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const fizz=  'fizz';$h‍_once.fizz(fizz);
 const bizz=  'bizz';$h‍_once.bizz(bizz);
 const buzz=  'buzz';$h‍_once.buzz(buzz);
 })
 ,
-// === functors[4] ===
+// === functors[5] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const        red=  '#f00';$h‍_once.red(red);
 const        green=  '#0f0';$h‍_once.green(green);
 const        blue=  '#00f';$h‍_once.blue(blue);
 })
 ,
-// === functors[5] ===
+// === functors[6] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([["./import-and-export-all.js", []]]);   
 })
 ,
-// === functors[6] ===
+// === functors[7] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const        gray=  '#777';$h‍_once.gray(gray);
 })
 ,
-// === functors[7] ===
+// === functors[8] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   const        qux=  'qux';$h‍_once.qux(qux);
 })
 ,
-// === functors[8] ===
+// === functors[9] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([["./import-and-reexport-name-from-me.js", []],["./import-and-reexport-name-as-from-me.js", []]]);   
 })
 ,
-// === functors[9] ===
+// === functors[10] ===
 (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   $h‍_imports([]);   print('dependency');
 })
 ,
-// === functors[10] ===
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let foo,bar,baz,fizz,buzz,colour,qux,grey,colors;$h‍_imports([["./import-default-export-from-me.js", [["default", [$h‍_a => (foo = $h‍_a)]]]],["./import-all-from-me.js", [["*", [$h‍_a => (bar = $h‍_a),$h‍_a => (baz = $h‍_a)]]]],["./import-named-exports-from-me.js", [["fizz", [$h‍_a => (fizz = $h‍_a)]],["buzz", [$h‍_a => (buzz = $h‍_a)]]]],["./import-named-export-and-rename.js", [["color", [$h‍_a => (colour = $h‍_a)]]]],["./reexport-name.js", [["qux", [$h‍_a => (qux = $h‍_a)]],["grey", [$h‍_a => (grey = $h‍_a)]]]],["./reexport-all.js", [["*", [$h‍_a => (colors = $h‍_a)]]]],["bundle-dep", []]]);   
+// === functors[11] ===
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let foo,bar,baz,fizz,buzz,colour,qux,grey,colors,cjsstuff;$h‍_imports([["./import-default-export-from-me.js", [["default", [$h‍_a => (foo = $h‍_a)]]]],["./import-all-from-me.js", [["*", [$h‍_a => (bar = $h‍_a),$h‍_a => (baz = $h‍_a)]]]],["./import-named-exports-from-me.js", [["fizz", [$h‍_a => (fizz = $h‍_a)]],["buzz", [$h‍_a => (buzz = $h‍_a)]]]],["./import-named-export-and-rename.js", [["color", [$h‍_a => (colour = $h‍_a)]]]],["./reexport-name.js", [["qux", [$h‍_a => (qux = $h‍_a)]],["grey", [$h‍_a => (grey = $h‍_a)]]]],["./reexport-all.js", [["*", [$h‍_a => (colors = $h‍_a)]]]],["bundle-dep", []],["./icando.cjs", [["*", [$h‍_a => (cjsstuff = $h‍_a)]]]]]);   
 
 
 print(foo);
@@ -75,6 +80,11 @@ print(grey);
 
 
 print(colors);
+
+
+
+
+print(cjsstuff);
 })
 ,
 ]; // functors end
@@ -98,6 +108,8 @@ print(colors);
   }
 
   const cells = [
+    {
+    },
     {
       c: cell("c"),
       i: cell("i"),
@@ -140,9 +152,9 @@ print(colors);
     },
   ];
 
-  Object.defineProperties(cells[5], Object.getOwnPropertyDescriptors(cells[4]));
+  Object.defineProperties(cells[6], Object.getOwnPropertyDescriptors(cells[5]));
 
-  Object.defineProperties(cells[8], {"qux": { value: cells[7]["qux"] },"grey": { value: cells[6]["gray"] } });
+  Object.defineProperties(cells[9], {"qux": { value: cells[8]["qux"] },"grey": { value: cells[7]["gray"] } });
           
   const namespaces = cells.map(cells => Object.create(null, cells));
 
@@ -169,12 +181,6 @@ print(colors);
     liveVar: {
     },
     onceVar: {
-      c: cells[0].c.set,
-      i: cells[0].i.set,
-      k: cells[0].k.set,
-      q: cells[0].q.set,
-      u: cells[0].u.set,
-      y: cells[0].y.set,
     },
     importMeta: {},
   });
@@ -185,7 +191,12 @@ print(colors);
     liveVar: {
     },
     onceVar: {
-      default: cells[1].default.set,
+      c: cells[1].c.set,
+      i: cells[1].i.set,
+      k: cells[1].k.set,
+      q: cells[1].q.set,
+      u: cells[1].u.set,
+      y: cells[1].y.set,
     },
     importMeta: {},
   });
@@ -196,7 +207,7 @@ print(colors);
     liveVar: {
     },
     onceVar: {
-      color: cells[2].color.set,
+      default: cells[2].default.set,
     },
     importMeta: {},
   });
@@ -207,9 +218,7 @@ print(colors);
     liveVar: {
     },
     onceVar: {
-      fizz: cells[3].fizz.set,
-      bizz: cells[3].bizz.set,
-      buzz: cells[3].buzz.set,
+      color: cells[3].color.set,
     },
     importMeta: {},
   });
@@ -220,31 +229,33 @@ print(colors);
     liveVar: {
     },
     onceVar: {
-      red: cells[4].red.set,
-      green: cells[4].green.set,
-      blue: cells[4].blue.set,
+      fizz: cells[4].fizz.set,
+      bizz: cells[4].bizz.set,
+      buzz: cells[4].buzz.set,
     },
     importMeta: {},
   });
   functors[5]({
     imports(entries) {
       const map = new Map(entries);
-      observeImports(map, "./import-and-export-all.js", 4);
     },
     liveVar: {
     },
     onceVar: {
+      red: cells[5].red.set,
+      green: cells[5].green.set,
+      blue: cells[5].blue.set,
     },
     importMeta: {},
   });
   functors[6]({
     imports(entries) {
       const map = new Map(entries);
+      observeImports(map, "./import-and-export-all.js", 5);
     },
     liveVar: {
     },
     onceVar: {
-      gray: cells[6].gray.set,
     },
     importMeta: {},
   });
@@ -255,25 +266,26 @@ print(colors);
     liveVar: {
     },
     onceVar: {
-      qux: cells[7].qux.set,
+      gray: cells[7].gray.set,
     },
     importMeta: {},
   });
   functors[8]({
     imports(entries) {
       const map = new Map(entries);
-      observeImports(map, "./import-and-reexport-name-as-from-me.js", 6);
-      observeImports(map, "./import-and-reexport-name-from-me.js", 7);
     },
     liveVar: {
     },
     onceVar: {
+      qux: cells[8].qux.set,
     },
     importMeta: {},
   });
   functors[9]({
     imports(entries) {
       const map = new Map(entries);
+      observeImports(map, "./import-and-reexport-name-as-from-me.js", 7);
+      observeImports(map, "./import-and-reexport-name-from-me.js", 8);
     },
     liveVar: {
     },
@@ -284,13 +296,24 @@ print(colors);
   functors[10]({
     imports(entries) {
       const map = new Map(entries);
-      observeImports(map, "./import-all-from-me.js", 0);
-      observeImports(map, "./import-default-export-from-me.js", 1);
-      observeImports(map, "./import-named-export-and-rename.js", 2);
-      observeImports(map, "./import-named-exports-from-me.js", 3);
-      observeImports(map, "./reexport-all.js", 5);
-      observeImports(map, "./reexport-name.js", 8);
-      observeImports(map, "bundle-dep", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[11]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./icando.cjs", 0);
+      observeImports(map, "./import-all-from-me.js", 1);
+      observeImports(map, "./import-default-export-from-me.js", 2);
+      observeImports(map, "./import-named-export-and-rename.js", 3);
+      observeImports(map, "./import-named-exports-from-me.js", 4);
+      observeImports(map, "./reexport-all.js", 6);
+      observeImports(map, "./reexport-name.js", 9);
+      observeImports(map, "bundle-dep", 10);
     },
     liveVar: {
     },
