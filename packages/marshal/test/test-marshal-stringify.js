@@ -55,7 +55,13 @@ test('marshal parse errors', t => {
     message: /Marshal's parse must not encode any slot positions .*/,
   });
   t.throws(() => parse('X'), {
-    message: /Unexpected token X in JSON at position 0*/,
+    // Format of the error message is not guaranteed since 
+    //   it differs between runtimes and versions.
+    //
+    // For v8 (and node) see:
+    //   - https://github.com/v8/v8/blame/b9420be7a2803a024893292aae4199d8ae5a4e5e/src/common/message-template.h#L484
+    //   - https://github.com/v8/v8/blame/70bdadce8f79e9ab12b9e8972803aea708fd36e7/src/common/message-template.h#L527
+    message: /^Unexpected\b/,
   });
   t.throws(() => parse('{"@qclass":8}'), {
     message: /invalid "@qclass" typeof "number"*/,
