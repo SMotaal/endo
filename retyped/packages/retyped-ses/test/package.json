@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "retyped-ses-test",
+  "version": "0.0.1",
+  "type": "module",
+  "npmClient": "npm",
+  "devDependencies": {
+    "typescript": "*",
+    "tsd": "*"
+  },
+  "scripts": {
+    "clean": "git clean -Xdf"
+  }
+}

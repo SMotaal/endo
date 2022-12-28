@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "noEmit": false,
+        "allowJs": true,
+        "emitDeclarationOnly": true,
+        "declaration": true,
+        "target": "esnext",
+        "module": "esnext",
+        "outFile": "./types.d.ts",
+    },
+    "extends": "./jsconfig.json",
+    "include": ["index.js", "src/**/*.js"],
+}

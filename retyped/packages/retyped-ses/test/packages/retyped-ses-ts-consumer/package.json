@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "retypes-ses-ts-consumer",
+  "version": "0.0.1",
+  "npmClient": "yarn",
+  "dependencies": {
+    "@endo/retyped-ses": "file:../../../"
+  }
+}

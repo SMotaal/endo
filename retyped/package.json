@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "npmClient": "yarn",
+  "workspaces": [
+    "packages/*",
+    "packages/*/test",
+    "packages/*/test/packages/*"
+  ]
+}

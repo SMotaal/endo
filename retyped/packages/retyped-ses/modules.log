@@ -1,0 +1,21 @@
+This file is manually updated with `tsc -p ./tsconfig.json --explainFiles` output.
+
+src/error/internal/details.js
+  Imported via "./details.js" from file 'src/error/internal/assert.js'
+  Imported via "./details.js" from file 'src/error/internal/errors.js'
+  Imported via "./details.js" from file 'src/error/internal/assert.1.js'
+  Matched by include pattern 'src/**/*.js' in 'tsconfig.json'
+src/error/internal/errors.js
+  Imported via "./errors.js" from file 'src/error/internal/assert.js'
+  Imported via "./errors.js" from file 'src/error/internal/assert.1.js'
+  Matched by include pattern 'src/**/*.js' in 'tsconfig.json'
+src/error/internal/assert.js
+  Imported via './internal/assert.js' from file 'src/error/assert.js'
+  Matched by include pattern 'src/**/*.js' in 'tsconfig.json'
+src/error/assert.js
+  Imported via './src/error/assert.js' from file 'index.js'
+  Matched by include pattern 'src/**/*.js' in 'tsconfig.json'
+index.js
+  Matched by include pattern 'index.js' in 'tsconfig.json'
+src/error/internal/assert.1.js
+  Matched by include pattern 'src/**/*.js' in 'tsconfig.json'

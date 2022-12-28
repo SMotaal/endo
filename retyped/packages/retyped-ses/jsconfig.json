@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "./",
+    "downlevelIteration": true,
+    "strictNullChecks": true,
+    "moduleResolution": "node",
+  },
+  "extends": "../../../packages/ses/tsconfig.json",
+  "include": ["index.js", "src/**/*.js"],
+  "exclude": ["./types"]
+}
