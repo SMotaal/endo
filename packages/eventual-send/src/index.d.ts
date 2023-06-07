@@ -1,4 +1,6 @@
 import * as _E from './E.js';
+import * as _HandledPromise from './handled-promise.js';
+import * as _Postponed from './postponed.js';
 
 // Exposing types directly per the jsdoc annotations and comments.
 //
@@ -15,6 +17,20 @@ export import DataOnly = _E.DataOnly;
 export import FarRef = _E.FarRef;
 export import ERef = _E.ERef;
 export import EProxy = _E.EProxy;
+export import EOnly = _E.EOnly;
+export import RemoteFunctions = _E.RemoteFunctions;
+export import LocalRecord = _E.LocalRecord;
+export import FilteredKeys = _E.FilteredKeys;
+export import PickCallable = _E.PickCallable;
+export import RemoteKit = _E.EPromiseKit;
+
+export import ResolveWithPresenceOptionsBag = _HandledPromise.ResolveWithPresenceOptionsBag;
+export import HandledExecutor = _HandledPromise.HandledExecutor;
+export import Settler = _HandledPromise.Settler;
+export import HandledPromiseStaticMethods = _HandledPromise.HandledPromiseStaticMethods;
+export import HandledPromiseConstructor = _HandledPromise.HandledPromiseConstructor;
+
+export import EHandler = _HandledPromise.Handler;
 
 // Type definitions for eventual-send
 
@@ -41,140 +57,6 @@ export import EProxy = _E.EProxy;
  * @see {@link https://www.typescriptlang.org/docs/handbook/2/generics.html#handbook-content}
  * @see {@link https://www.typescriptlang.org/docs/handbook/2/conditional-types.html}
  */
-
-export type Callable = (...args: any[]) => any;
-
-export declare const EmptyObj: {};
-
-// Type for an object that must only be invoked with E.  It supports a given
-// interface but declares all the functions as asyncable.
-export type EOnly<T> = T extends (...args: infer P) => infer R
-  ? (...args: P) => ERef<Awaited<R>> | EOnly<Awaited<R>>
-  : T extends Record<PropertyKey, Callable>
-  ? ERef<{
-      [K in keyof T]: EOnly<T[K]>;
-    }>
-  : ERef<T>;
-
-/**
- * Return a union of property names/symbols/numbers P for which the record element T[P]'s type extends U.
- *
- * Given const x = { a: 123, b: 'hello', c: 42, 49: () => {}, 53: 67 },
- *
- * FilteredKeys<typeof x, number> is the type 'a' | 'c' | 53.
- * FilteredKeys<typeof x, string> is the type 'b'.
- * FilteredKeys<typeof x, 42 | 67> is the type 'c' | 53.
- * FilteredKeys<typeof x, boolean> is the type never.
- */
-export type FilteredKeys<T, U> = {
-  [P in keyof T]: T[P] extends U ? P : never;
-}[keyof T];
-
-/**
- * `PickCallable<T>` means to return a single root callable or a record type
- * consisting only of properties that are functions.
- */
-export type PickCallable<T> = T extends Callable
-  ? (...args: Parameters<T>) => ReturnType<T> // a root callable, no methods
-  : Pick<T, FilteredKeys<T, Callable>>; // any callable methods
-
-/**
- * `RemoteFunctions<T>` means to return the functions and properties that are remotely callable.
- */
-export type RemoteFunctions<T> = T extends RemotableBrand<infer L, infer R> // if a given T is some remote interface R
-  ? PickCallable<R> // then use the function properties of R
-  : Awaited<T> extends RemotableBrand<infer L, infer R> // otherwise, if the final resolution of T is some remote interface R
-  ? PickCallable<R> // then use the function properties of R
-  : T extends PromiseLike<infer U>
-  ? Awaited<T> // otherwise, use the final resolution of that T
-  : T;
-
-export type LocalRecord<T> = T extends RemotableBrand<infer L, infer R>
-  ? L
-  : Awaited<T> extends RemotableBrand<infer L, infer R>
-  ? L
-  : T extends PromiseLike<infer U>
-  ? Awaited<T>
-  : T;
-export interface EHandler<T> {
-  get?: (p: T, name: PropertyKey, returnedP?: Promise<unknown>) => unknown;
-  getSendOnly?: (p: T, name: PropertyKey) => void;
-  applyFunction?: (
-    p: T,
-    args: unknown[],
-    returnedP?: Promise<unknown>,
-  ) => unknown;
-  applyFunctionSendOnly?: (p: T, args: unknown[]) => void;
-  applyMethod?: (
-    p: T,
-    name: PropertyKey | undefined,
-    args: unknown[],
-    returnedP?: Promise<unknown>,
-  ) => unknown;
-  applyMethodSendOnly?: (
-    p: T,
-    name: PropertyKey | undefined,
-    args: unknown[],
-  ) => void;
-}
-
-export type ResolveWithPresenceOptionsBag<T extends object> = {
-  proxy?: {
-    handler: ProxyHandler<T>;
-    target: unknown;
-    revokerCallback?: (revoker: () => void) => void;
-  };
-};
-
-export type HandledExecutor<R = unknown> = (
-  resolveHandled: (value?: R) => void,
-  rejectHandled: (reason?: unknown) => void,
-  resolveWithPresence: (
-    presenceHandler: EHandler<{}>,
-    options?: ResolveWithPresenceOptionsBag<{}>,
-  ) => object,
-) => void;
-
-declare interface Settler<R = unknown> {
-  resolve: (value?: R) => void;
-  reject: (reason?: unknown) => void;
-  resolveWithPresence: (
-    presenceHandler?: EHandler<{}>,
-    options?: ResolveWithPresenceOptionsBag<{}>,
-  ) => object;
-}
-
-declare interface RemoteKit<R = unknown> {
-  promise: Promise<R>;
-  settler: Settler<R>;
-}
-
-declare interface HandledPromiseStaticMethods {
-  applyFunction(target: unknown, args: unknown[]): Promise<unknown>;
-  applyFunctionSendOnly(target: unknown, args: unknown[]): void;
-  applyMethod(
-    target: unknown,
-    prop: PropertyKey | undefined,
-    args: unknown[],
-  ): Promise<unknown>;
-  applyMethodSendOnly(
-    target: unknown,
-    prop: PropertyKey,
-    args: unknown[],
-  ): void;
-  get(target: unknown, prop: PropertyKey): Promise<unknown>;
-  getSendOnly(target: unknown, prop: PropertyKey): void;
-}
-
-export interface HandledPromiseConstructor
-  extends PromiseConstructor,
-    HandledPromiseStaticMethods {
-  new <R>(
-    executor: HandledExecutor<R>,
-    unfulfilledHandler?: EHandler<Promise<unknown>>,
-  ): Promise<R>;
-  prototype: Promise<unknown>;
-}
 
 declare namespace global {
   // eslint-disable-next-line vars-on-top,no-var

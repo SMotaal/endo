@@ -1,17 +1,11 @@
 /// <reference types="ses" />
 
 /**
- * @template T
- * @typedef {import('./index').EHandler<T>} EHandler
- */
-
-/**
  * Create a simple postponedHandler that just postpones until donePostponing is
  * called.
  *
  * @param {import('./index').HandledPromiseConstructor} HandledPromise
- * @returns {[Required<EHandler<any>>, () => void]} A pair consisting of the
- * postponedHandler and donePostponing callback.
+ * @returns {[import('./index').EHandler<any>, () => void]} postponedHandler and donePostponing callback.
  */
 export const makePostponedHandler = HandledPromise => {
   let donePostponing;
@@ -33,7 +27,7 @@ export const makePostponedHandler = HandledPromise => {
     };
   };
 
-  /** @type {Required<EHandler<any>>} */
+  /** @type {Required<import('./index').EHandler<any>>} */
   const postponedHandler = {
     get: makePostponedOperation('get'),
     getSendOnly: makePostponedOperation('getSendOnly'),

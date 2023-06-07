@@ -232,7 +232,7 @@ export default makeE;
  * properties that are *not* functions.
  *
  * @template T The type to be filtered.
- * @typedef {Omit<T, import('./index').FilteredKeys<T, import('./index').Callable>>} DataOnly
+ * @typedef {Omit<T, import('./index').FilteredKeys<T, import('./types').Callable>>} DataOnly
  */
 
 /**
@@ -246,13 +246,13 @@ export default makeE;
  */
 
 /**
- * @template {import('./index').Callable} T
+ * @template {import('./types').Callable} T
  * @typedef {ReturnType<T> extends PromiseLike<infer U> ? T : (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>} ECallable
  */
 
 /**
  * @template T
- * @typedef {{ readonly [P in keyof T]: T[P] extends import('./index').Callable ? ECallable<T[P]> : never; }} EMethods
+ * @typedef {{ readonly [P in keyof T]: T[P] extends import('./types').Callable ? ECallable<T[P]> : never; }} EMethods
  */
 
 /**
@@ -261,21 +261,69 @@ export default makeE;
  */
 
 /**
- * @template {import('./index').Callable} T
+ * @template {import('./types').Callable} T
  * @typedef {(...args: Parameters<T>) => Promise<void>} ESendOnlyCallable
  */
 
 /**
  * @template T
- * @typedef {{ readonly [P in keyof T]: T[P] extends import('./index').Callable ? ESendOnlyCallable<T[P]> : never; }} ESendOnlyMethods
+ * @typedef {{ readonly [P in keyof T]: T[P] extends import('./types').Callable ? ESendOnlyCallable<T[P]> : never; }} ESendOnlyMethods
  */
 
 /**
  * @template T
- * @typedef {T extends import('./index').Callable ? ESendOnlyCallable<T> & ESendOnlyMethods<Required<T>> : ESendOnlyMethods<Required<T>>} ESendOnlyCallableOrMethods
+ * @typedef {T extends import('./types').Callable ? ESendOnlyCallable<T> & ESendOnlyMethods<Required<T>> : ESendOnlyMethods<Required<T>>} ESendOnlyCallableOrMethods
  */
 
 /**
  * @template T
- * @typedef {T extends import('./index').Callable ? ECallable<T> & EMethods<Required<T>> : EMethods<Required<T>>} ECallableOrMethods
+ * @typedef {T extends import('./types').Callable ? ECallable<T> & EMethods<Required<T>> : EMethods<Required<T>>} ECallableOrMethods
+ */
+
+/**
+ * Return a union of property names/symbols/numbers P for which the record element T[P]'s type extends U.
+ *
+ * Given const x = { a: 123, b: 'hello', c: 42, 49: () => {}, 53: 67 },
+ *
+ * FilteredKeys<typeof x, number> is the type 'a' | 'c' | 53.
+ * FilteredKeys<typeof x, string> is the type 'b'.
+ * FilteredKeys<typeof x, 42 | 67> is the type 'c' | 53.
+ * FilteredKeys<typeof x, boolean> is the type never.
+ *
+ * @template T
+ * @template U
+ * @typedef {{[P in keyof T]: T[P] extends U ? P : never;}[keyof T]} FilteredKeys
+ */
+
+/**
+ * `PickCallable<T>` means to return a single root callable or a record type
+ * consisting only of properties that are functions.
+ *
+ * @template T
+ * @typedef {T extends import('./types').Callable ? (...args: Parameters<T>) => ReturnType<T> : Pick<T, FilteredKeys<T, import('./types').Callable>>} PickCallable
+ */
+
+/**
+ * `RemoteFunctions<T>` means to return the functions and properties that are remotely callable.
+ *
+ * @template T
+ * @typedef {T extends RemotableBrand<infer L, infer R> ? import('./index').PickCallable<R> : Awaited<T> extends RemotableBrand<infer L, infer R> ? import('./index').PickCallable<R> : T extends PromiseLike<infer U> ? Awaited<T> : T} RemoteFunctions
+ */
+
+/**
+ * @template T
+ * @typedef {T extends RemotableBrand<infer L, infer R> ? L : Awaited<T> extends RemotableBrand<infer L, infer R> ? L : T extends PromiseLike<infer U> ? Awaited<T> : T} LocalRecord
+ */
+
+/**
+ * @template {unknown} R
+ * @typedef {{promise: Promise<R>, settler: import('./handled-promise.js').Settler<R>}} EPromiseKit
+ */
+
+/**
+ * Type for an object that must only be invoked with E.  It supports a given
+ * interface but declares all the functions as asyncable.
+ *
+ * @template T
+ * @typedef {T extends (...args: infer P) => infer R ? (...args: P) => Promise<R> : T extends Record<PropertyKey, import('./types').Callable> ? { [K in keyof T]: T[K] extends import('./types').Callable ? (...args: Parameters<T[K]>) => Promise<ReturnType<T[K]>> : T[K] } : T} EOnly
  */
