@@ -112,14 +112,14 @@ export const makeHandledPromise = () => {
    * This special handler accepts Promises, and forwards
    * handled Promises to their corresponding fulfilledHandler.
    *
-   * @type {Required<import('./index').EHandler<any>>}
+   * @type {Required<Handler<any>>}
    */
   let forwardingHandler;
   let handle;
 
   /**
    * @param {string} handlerName
-   * @param {import('./index').EHandler<any>} handler
+   * @param {Handler<any>} handler
    * @param {string} operation
    * @param {any} o
    * @param {any[]} opArgs
@@ -189,7 +189,7 @@ export const makeHandledPromise = () => {
     );
   };
 
-  /** @typedef {{new <R>(executor: HandledExecutor<R>, unfulfilledHandler?: import('./index').EHandler<Promise<unknown>>): Promise<R>, prototype: Promise<unknown>} & PromiseConstructor & import('./index').HandledPromiseStaticMethods} HandledPromiseConstructor */
+  /** @typedef {{new <R>(executor: HandledExecutor<R>, unfulfilledHandler?: Handler<Promise<unknown>>): Promise<R>, prototype: Promise<unknown>} & PromiseConstructor & HandledPromiseStaticMethods} HandledPromiseConstructor */
   /** @type {HandledPromiseConstructor} */
   let HandledPromise;
 
@@ -197,8 +197,8 @@ export const makeHandledPromise = () => {
    * This *needs* to be a `function X` so that we can use it as a constructor.
    *
    * @template R
-   * @param {import('./index').HandledExecutor<R>} executor
-   * @param {import('./index').EHandler<Promise<R>>} [pendingHandler]
+   * @param {HandledExecutor<R>} executor
+   * @param {Handler<Promise<R>>} [pendingHandler]
    * @returns {Promise<R>}
    */
   function baseHandledPromise(executor, pendingHandler = undefined) {
@@ -392,7 +392,7 @@ export const makeHandledPromise = () => {
     );
   };
 
-  /** @type {import('./index').HandledPromiseStaticMethods & Pick<PromiseConstructor, 'resolve'>} */
+  /** @type {HandledPromiseStaticMethods & Pick<PromiseConstructor, 'resolve'>} */
   const staticMethods = {
     get(target, prop) {
       prop = coerceToObjectProperty(prop);
@@ -581,38 +581,54 @@ export const makeHandledPromise = () => {
 
 /**
  * @template T
- * @typedef {object} Handler
- * @property {(p: T, name: PropertyKey, returnedP?: Promise<unknown>) => unknown} [get]
- * @property {(p: T, name: PropertyKey) => void} [getSendOnly]
- * @property {(p: T, args: unknown[], returnedP?: Promise<unknown>) => unknown} [applyFunction]
- * @property {(p: T, args: unknown[]) => void} [applyFunctionSendOnly]
- * @property {(p: T, name: PropertyKey | undefined, args: unknown[], returnedP?: Promise<unknown>) => unknown} [applyMethod]
- * @property {(p: T, name: PropertyKey | undefined, args: unknown[]) => void} [applyMethodSendOnly]
+ * @typedef {{
+ *   get?(p: T, name: PropertyKey, returnedP?: Promise<unknown>): unknown;
+ *   getSendOnly?(p: T, name: PropertyKey): void;
+ *   applyFunction?(p: T, args: unknown[], returnedP?: Promise<unknown>): unknown;
+ *   applyFunctionSendOnly?(p: T, args: unknown[]): void;
+ *   applyMethod?(p: T, name: PropertyKey | undefined, args: unknown[], returnedP?: Promise<unknown>): unknown;
+ *   applyMethodSendOnly?(p: T, name: PropertyKey | undefined, args: unknown[]): void;
+ * }} Handler
  */
 
 /**
  * @template {{}} T
- * @typedef {{proxy?: {handler: ProxyHandler<T>, target: unknown, revokerCallback?: (revoker: () => void) => void} } } ResolveWithPresenceOptionsBag
+ * @typedef {{
+ *   proxy?: {
+ *     handler: ProxyHandler<T>;
+ *     target: unknown;
+ *     revokerCallback?(revoker: () => void): void;
+ *   };
+ * }} ResolveWithPresenceOptionsBag
  */
 
 /**
  * @template {unknown} R
- * @typedef {(resolveHandled: (value?: R) => void, rejectHandled: (reason?: unknown) => void, resolveWithPresence: ( presenceHandler: import('./index').EHandler<{}>, options?: import('./index').ResolveWithPresenceOptionsBag<{}>, ) => object ) => void} HandledExecutor
+ * @typedef {(
+ *   resolveHandled: (value?: R) => void,
+ *   rejectHandled: (reason?: unknown) => void,
+ *   resolveWithPresence: (presenceHandler: Handler<{}>, options?: ResolveWithPresenceOptionsBag<{}>) => object,
+ * ) => void} HandledExecutor
  */
 
 /**
  * @template {unknown} R
- * @typedef {{resolve: (value?: R) => void, reject: (reason: unknown) => void, resolveWithPresence: (presenceHandler?: import('./index').EHandler<{}>, options?: import('./index').ResolveWithPresenceOptionsBag<{}> ) => object}} Settler
+ * @typedef {{
+ *   resolve(value?: R): void;
+ *   reject(reason: unknown): void;
+ *   resolveWithPresence(presenceHandler?: Handler<{}>, options?: ResolveWithPresenceOptionsBag<{}>): object;
+ * }} Settler
  */
 
 /**
- * @typedef {object} HandledPromiseStaticMethods
- * @property {(target: unknown, args: unknown[])=> Promise<unknown>} applyFunction
- * @property {(target: unknown, args: unknown[])=> void} applyFunctionSendOnly
- * @property {(target: unknown, prop: PropertyKey | undefined, args: unknown[])=> Promise<unknown>} applyMethod
- * @property {(target: unknown, prop: PropertyKey, args: unknown[])=> void} applyMethodSendOnly
- * @property {(target: unknown, prop: PropertyKey)=> Promise<unknown>} get
- * @property {(target: unknown, prop: PropertyKey)=> void} getSendOnly
+ * @typedef {{
+ *   applyFunction(target: unknown, args: unknown[]): Promise<unknown>;
+ *   applyFunctionSendOnly(target: unknown, args: unknown[]): void;
+ *   applyMethod(target: unknown, prop: PropertyKey | undefined, args: unknown[]): Promise<unknown>;
+ *   applyMethodSendOnly(target: unknown, prop: PropertyKey, args: unknown[]): void;
+ *   get(target: unknown, prop: PropertyKey): Promise<unknown>;
+ *   getSendOnly(target: unknown, prop: PropertyKey): void;
+ * }} HandledPromiseStaticMethods
  */
 
 /** @typedef {ReturnType<makeHandledPromise>} HandledPromiseConstructor */

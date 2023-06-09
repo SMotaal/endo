@@ -4,11 +4,13 @@
  * Create a simple postponedHandler that just postpones until donePostponing is
  * called.
  *
- * @param {import('./index').HandledPromiseConstructor} HandledPromise
- * @returns {[import('./index').EHandler<any>, () => void]} postponedHandler and donePostponing callback.
+ * @param {import('./types').HandledPromiseConstructor} HandledPromise
+ * @returns {[Required<import('./types').Handler<any>>, () => void]} postponedHandler and donePostponing callback.
  */
 export const makePostponedHandler = HandledPromise => {
+  /** @type {() => void} */
   let donePostponing;
+
   const interlockP = new Promise(resolve => {
     donePostponing = () => resolve(undefined);
   });
@@ -27,7 +29,7 @@ export const makePostponedHandler = HandledPromise => {
     };
   };
 
-  /** @type {Required<import('./index').EHandler<any>>} */
+  /** @type {Required<import('./types').Handler<any>>} */
   const postponedHandler = {
     get: makePostponedOperation('get'),
     getSendOnly: makePostponedOperation('getSendOnly'),
@@ -37,6 +39,8 @@ export const makePostponedHandler = HandledPromise => {
     applyMethodSendOnly: makePostponedOperation('applyMethodSendOnly'),
   };
 
+  // @ts-expect-error 2454
   assert(donePostponing);
+
   return [postponedHandler, donePostponing];
 };
