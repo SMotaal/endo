@@ -86,6 +86,8 @@ const getDefaultState = () => ({
   currentTurnPhase: 0,
   scoreFnCard: undefined, 
   drawStackIds: [],
+  /** @type {'started' | 'ended' | undefined} */
+  currentState: undefined,
 })
 
 export function makeGame (initialState = getDefaultState(), deck, persistState) {
@@ -497,13 +499,22 @@ export const make = async (powers) => {
     return makeRemoteGrain(locationCardDataGrain)
   }
 
+  const getDeck = async () => {
+    const deck = await E(powers).lookup('deck');
+    console.log('get deck', deck);
+    return deck;
+  };
+
   return Far('Game', {
+    async getDeck() {
+      return getDeck();
+    },
     async setDeck (deckId) {
       console.log('set deck with id', deckId)
       await E(powers).write('deck', deckId);
-      const deck = await E(powers).lookup('deck')
-      console.log('get deck', deck)
-      await initGameWithDeck(deck);
+      // const deck = await E(powers).lookup('deck')
+      // console.log('get deck', deck)
+      await initGameWithDeck(await getDeck());
     },
     async start () {
       // TODO: mark game as started,
@@ -526,6 +537,9 @@ export const make = async (powers) => {
       const localPlayer = playerRemoteToLocal.get(remoteSourcePlayer)
       const localDestinationPlayer = playerRemoteToLocal.get(remoteDestinationPlayer)
       await game.playCardByIdFromHand(localPlayer, cardId, localDestinationPlayer)
+    },
+    async playerCount() {
+      return game.getPlayerCount();
     },
     async playerAtIndex (index) {
       // returns the (private) remote interface for player control at the index

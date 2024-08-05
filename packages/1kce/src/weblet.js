@@ -1,9 +1,15 @@
+/* eslint-disable @endo/no-optional-chaining */
+/* eslint-disable @endo/no-nullish-coalescing */
+/* eslint-disable no-continue */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-shadow */
+/* eslint-disable no-await-in-loop */
 import { E } from '@endo/far';
 import { makeRefIterator } from '@endo/daemon/ref-reader.js';
+import { makeReaderRef } from '@endo/daemon/reader-ref.js';
 import { make as makeApp } from './ui/index.js';
 import deckBundleJson from '../bundles/bundle-deck.json';
 import gameBundleJson from '../bundles/bundle-game.json';
-import { makeReaderRef } from '@endo/daemon/reader-ref.js';
 
 const textEncoder = new TextEncoder();
 
@@ -137,7 +143,112 @@ export const make = (agent) => {
       const hostHandleName = gameHostHandleName
       return makeBundle(agent, gameBundleJson, resultName, hostAgentName, hostHandleName)
     },
-  }
 
-  return makeApp({ actions })
-}
+    async getGameAgent({ gameAgentName = 'agent-game' }) {
+      return actions.lookup(gameAgentName);
+    },
+
+    async getGame({ agent, gameAgentName = 'agent-game' }) {
+      return E(agent ?? actions.getGameAgent({ gameAgentName })).lookup('game');
+    },
+
+    async getDeck({ game, agent, gameAgentName }) {
+      return E((game ??= await actions.getGame({ agent, gameAgentName }))).getDeck();
+    },
+
+    async getPlayerAtIndex({ game, agent, gameAgentName, playerIndex }) {
+      try {
+        return E((game ??= await actions.getGame({ agent, gameAgentName }))).playerAtIndex(playerIndex);
+      } catch (error) {
+        console.error('getPlayerAtIndex error:', error);
+        return undefined;
+      }
+    },
+
+    async getPlayerCount({ game, agent, gameAgentName }) {
+      return E((game ??= await actions.getGame({ agent, gameAgentName }))).playerCount();
+    },
+
+    async makePlayer({ playerName, agent, gameAgentName = 'agent-game', game }) {
+      const newPlayerIndex = await E((game ??= actions.getGame({ agent, gameAgentName }))).newPlayer();
+      return actions.evaluate(
+        `E(game).playerAtIndex(${Number(newPlayerIndex)})`,
+        { game: `${gameAgentName}.game` },
+        playerName,
+      );
+    },
+
+    async setDeckByName({
+      newDeckName = 'deck-new',
+      agent,
+      gameAgentName = 'agent-game',
+      game,
+    }) {
+      const deckId = await actions.identify(newDeckName);
+      await E((game ??= actions.getGame({ game, agent, gameAgentName }))).setDeck(deckId);
+      return deckId;
+    },
+  };
+
+  return makeApp({
+    actions,
+    routines: {
+
+      /**
+       * Convenience routine to prepare a new game with a new deck and players.
+       * @param {object} options
+       * @param {string} [options.newDeckName='deck-new'] - The name of the new deck.
+       * @param {string[]} [options.playerNames=['player-0', 'player-1']] - The names of the players.
+       * @param {string[]} [options.cardNames=['card-firmament', 'card-lost', 'card-firmament', 'card-lost', 'card-firmament', 'card-lost', 'card-firmament']] - The names of the cards to add to the deck.
+       * @param {string} [options.gameAgentName='agent-game'] - The name of the game agent.
+       * @param {object} [options.game] - The game object.
+       * @param {boolean} [options.autoStartGame=true] - Whether to automatically start the game.
+       */
+      async prepareNewGame({
+        newDeckName = 'deck-new',
+        playerNames = ['player-0', 'player-1'],
+        cardNames = [
+          'card-firmament', 'card-lost',
+          'card-firmament', 'card-lost',
+          'card-firmament', 'card-lost',
+          'card-firmament',
+        ],
+        gameAgentName = 'agent-game',
+        game,
+        autoStartGame = true,
+      } = {}) {
+
+        const agent = await actions.getGameAgent({ gameAgentName });
+
+        // Ensure we have a reference to the Game
+        game ??= await actions.getGame({ agent });
+
+        // Set the deck to the newDeckName
+        const deckId = await actions.setDeckByName({ newDeckName, agent, game });
+
+        const deck = await actions.getDeck({ game, agent, gameAgentName });
+        const deckCards = await E(deck).getCards();
+        const initialDeckCardCount = deckCards?.length;
+
+        if (!initialDeckCardCount) {
+          // Add 5 cards of each type to the deck
+          for (const cardName of cardNames)
+            await actions.addCardToDeckByName(cardName);
+        }
+
+        const initialPlayerCount = Number(await actions.getPlayerCount({ game, agent, gameAgentName }));
+
+        for (let playerIndex = initialPlayerCount; playerIndex < playerNames.length; playerIndex++)
+          await actions.makePlayer({ playerName: playerNames[playerIndex], agent, gameAgentName, game });
+
+        const players = new Array(Math.max(initialPlayerCount, playerNames.length));
+
+        for (let playerIndex = 0; playerIndex < players.length; playerIndex++)
+          players[playerIndex] = await E(game).playerAtIndex(playerIndex);
+
+        return { game, agent, gameAgentName, deckName: newDeckName, deckId, players, initialPlayerCount, initialDeckCardCount, autoStartGame };
+      },
+
+    },
+  });
+};

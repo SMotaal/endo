@@ -1,3 +1,5 @@
+/* eslint-disable @endo/no-optional-chaining */
+/* eslint-disable @endo/restrict-comparison-operands */
 import React from 'react';
 import { E } from '@endo/far';
 import { makeReadonlyGrainMapFromRemote } from '@endo/grain/captp.js';
@@ -105,22 +107,49 @@ const GameStartComponent = ({ gameMgmt}) => {
   }, 'Start Game')
 }
 
-export const App = ({ actions }) => {
-  const [gameAgentName, setGameAgentName] = React.useState(undefined);
+export const App = ({ actions, initialState }) => {
+  const [gameAgentName, setGameAgentName] = useState(undefined);
+  const [deckReadiness, setDeckReadiness] = useState(0);
+
+  const updateDeckId = (deckId) => {
+    console.log('update deck with id', deckId);
+    // await E(game).setDeck(deckId)
+    setDeckReadiness(value => value + 1);
+  };
+
   const { value: gameKit } = useAsync(async () => {
-    if (!gameAgentName) return
-    const agent = await actions.lookup(gameAgentName)
-    const game = await E(agent).lookup('game')
-    return { agent, game }
+    if (!gameAgentName) {
+      if (initialState) {
+        const initialGameAgentName = await (await initialState)?.gameAgentName;
+        const initialAgent = await (await initialState)?.agent;
+        const initialGame = await (await initialState)?.game;
+        const initialDeckName = await (await initialState)?.deckName;
+        const initialDeckId = await (await initialState)?.deckId;
+
+        // console.log('gamekit', { initialAgent, initialGame, initialGameAgentName, initialDeckName, initialDeckId });
+
+        if (initialGameAgentName && initialAgent && initialGame && initialDeckName && initialDeckId) {
+          setGameAgentName(initialGameAgentName);
+          updateDeckId(initialDeckId);
+          return { agent: initialAgent, game: initialGame };
+        }
+      }
+    } else {
+      const agent = await actions.lookup(gameAgentName)
+      const game = await E(agent).lookup('game')
+      // console.log('gamekit', { agent, game, initialState });
+      return { agent, game }
+    }
     // todo, lookup game state / deck?
-  }, [gameAgentName])
-  const { agent, game } = gameKit || {};
+  }, [gameAgentName, initialState]);
+
+  const { game } = gameKit || {};
   // // TODO: this is a disgusting rate of resubs
   // const stateGrain = game && makeReadonlyGrainMapFromRemote(E(game).getStateGrain())
 
   // slimeball workaround for useLookup subs failing for depth>1
   // manually increase to trigger refresh of deck value
-  const [deckReadiness, setDeckReadiness] = React.useState(0)
+  // const [deckReadiness, setDeckReadiness] = React.useState(0)
   const { value: deck } = useLookup(actions, [gameAgentName, 'deck'], [deckReadiness]);
 
   const [playerControl, setPlayerControl] = useState();
@@ -128,10 +157,11 @@ export const App = ({ actions }) => {
 
   const setDeckByName = async (newDeckName) => {
     console.log('set deck by name', newDeckName)
-    const deckId = await actions.identify(newDeckName)
-    console.log('set deck with id', deckId)
-    await E(game).setDeck(deckId)
-    setDeckReadiness(value => value + 1)
+    updateDeckId(await actions.setDeckByName({ newDeckName, gameAgentName, game }));
+    // const deckId = await actions.identify(newDeckName)
+    // console.log('set deck with id', deckId)
+    // await E(game).setDeck(deckId)
+    // setDeckReadiness(value => value + 1)
   }
 
   const deckMgmt = {
@@ -156,16 +186,20 @@ export const App = ({ actions }) => {
   const playerMgmt = {
     async newPlayer(destName) {
       console.log('new player', destName)
-      // create the player in the game
-      const newPlayerIndex = await E(game).newPlayer()
-      // create the facet in the players inventory
-      // TODO: evaluate endowments doesnt actually supports paths?
+      const result = actions.makePlayer({ playerName: destName, gameAgentName, game });
+      const awaitedResult = await result;
+      console.log('new player', { result, awaitedResult });
+
+      // // create the player in the game
+      // const newPlayerIndex = await E(game).newPlayer()
+      // // create the facet in the players inventory
+      // // TODO: evaluate endowments doesnt actually supports paths?
+      // // await actions.evaluate(`E(game).playerAtIndex(${Number(newPlayerIndex)})`, {
+      // //   game: `${gameAgentName}.game`
+      // // }, destName)
       // await actions.evaluate(`E(game).playerAtIndex(${Number(newPlayerIndex)})`, {
       //   game: `${gameAgentName}.game`
       // }, destName)
-      await actions.evaluate(`E(game).playerAtIndex(${Number(newPlayerIndex)})`, {
-        game: `${gameAgentName}.game`
-      }, destName)
     }
   }
 
@@ -188,7 +222,24 @@ export const App = ({ actions }) => {
     }
   }
 
-  const gameIsReady = (stateGrain !== undefined) && (playerControl !== undefined)
+  // const gameIsReady = (stateGrain !== undefined) && (playerControl !== undefined)
+
+  const { value: gameIsReady } = useAsync(async () => {
+    console.log('gameIsReady', { stateGrain, playerControl, gameKit, initialState });
+
+    if (stateGrain !== undefined && playerControl !== undefined) return true;
+
+    if (
+      (await (await initialState)?.players)?.length >= 2
+      && (await (await initialState)?.autoStartGame)
+    ) {
+      await gameMgmt.start();
+      return true;
+    }
+
+    return false;
+
+  }, [stateGrain, playerControl, gameAgentName, initialState]);
 
   return (
     h('div', {}, [
@@ -203,7 +254,7 @@ export const App = ({ actions }) => {
           fontSize: '42px',
         },
       }, ['🃏1kce🃏']),
-      
+
       // no game loaded: select game
       !gameIsReady && h(Fragment, null, [
         // select game
