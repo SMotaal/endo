@@ -59,6 +59,7 @@ export const make = async (_powers, context) => {
    * @param {number} requestedPort
    * @param {string} webletId
    * @param {Promise<never>} webletCancelled
+   * @param {string} [requestedAlias]
    */
   const makeWeblet = (
     webletBundle,
@@ -66,8 +67,9 @@ export const make = async (_powers, context) => {
     requestedPort,
     webletId,
     webletCancelled,
+    requestedAlias,
   ) => {
-    const accessToken = webletId.slice(0, 32);
+    const accessToken = requestedAlias || webletId.slice(0, 32);
 
     const cancelled = Promise.race([webletCancelled, serverCancelled]);
 
@@ -164,7 +166,7 @@ export const make = async (_powers, context) => {
 
     const started = servePortHttp({
       port: requestedPort,
-      host: '127.0.0.1',
+      host: '0.0.0.0',
       respond,
       connect,
       cancelled,

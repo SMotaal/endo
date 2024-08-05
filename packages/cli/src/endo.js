@@ -87,12 +87,14 @@ export const main = async rawArgs => {
     )
     .option(...commonOptions.requiredName)
     .option('-o,--open', 'Open the new web page immediately (weblet)')
+    .option('--alias <alias>', 'Alias for the weblet')
     .action(async (programPath, cmd) => {
       const {
         name: webletName,
         bundle: bundleName,
         powers: powersName = 'NONE',
         listen: requestedPort,
+        alias: requestedAlias,
         as: agentNames,
         open: doOpen,
       } = cmd.opts();
@@ -104,6 +106,7 @@ export const main = async rawArgs => {
         doOpen,
         webletName,
         requestedPort,
+        requestedAlias,
         programPath,
         bundleName,
         powersName,

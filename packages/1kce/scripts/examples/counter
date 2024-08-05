@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+[ "$PWD" == "$INIT_CWD" ] && [ "$(dirname "$(realpath "$0")")" == "$(realpath "scripts")" ] || {
+    echo "Must use yarn workspace to call $(realpath "$0")"
+    exit 1
+}
+
+set -x
+
+### SEE: https://github.com/endojs/endo/pull/2219
+
+yarn run endo make $(realpath "$0")/../../cli/demo/counter.js --name counter
+# Object [Alleged: Counter] {}
+
+yarn run endo mkhost other other-agent
+# Object [Alleged: EndoHost] {}
+
+# yarn run endo invite bob > invitation.link
+invitation=$(yarn run endo invite bob)
+#
+
+# yarn run endo accept alice --as other-agent < invitation.link
+yarn run endo accept alice --as other-agent <<< "$invitation"
+#
+
+yarn run endo send bob 'Hi, here is @counter'
+#
+
+yarn run endo list
+yarn run endo list other-agent
+
+yarn run endo show counter
+# Object [Alleged: Counter] {}
+
+yarn run endo show counter --as other-agent
+# CapTP cli exception: (RemoteTypeError(error:captp:Endo#20001)#1)
+# RemoteTypeError(error:captp:Endo#20001)#1: Unknown pet name: "counter"
+# ...
+
+yarn run endo adopt 0 counter --as other-agent
+#
+
+yarn run endo list
+yarn run endo list other-agent
+
+yarn run endo show counter --as other-agent
+# Object [Alleged: Counter] {}

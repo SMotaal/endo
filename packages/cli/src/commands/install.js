@@ -18,6 +18,7 @@ export const install = async ({
   powersName,
   webletName,
   requestedPort,
+  requestedAlias,
   programPath,
   doOpen,
 }) => {
@@ -50,7 +51,7 @@ export const install = async ({
         'MAIN',
         `E(apps).makeWeblet(bundle, powers, ${JSON.stringify(
           requestedPort,
-        )}, $id, $cancelled)`,
+        )}, $id, $cancelled, ${JSON.stringify(requestedAlias)})`,
         ['apps', 'bundle', 'powers'],
         ['APPS', bundleName, powersName],
         webletName,

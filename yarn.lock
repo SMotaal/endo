@@ -9,6 +9,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "1kce-demo@workspace:packages/1kce"
   dependencies:
+    "@endo/cli": "npm:^2.2.0"
     "@endo/daemon": "npm:^2.3.0"
     "@endo/far": "npm:^1.1.2"
     "@endo/grain": "npm:0.1.0"

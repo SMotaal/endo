@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+[ "$PWD" == "$INIT_CWD" ] && [ "$(dirname "$(realpath "$0")")" == "$(realpath "scripts")" ] || {
+    echo "Must use yarn workspace to call the $(basename "$0") script"
+    exit 1
+}
+
+echo "$(basename "$0") is not supported yet!" && exit 1;
+
+yarn exec scripts/endo \
+    setup-tcp-networking \
+    setup-app-wallet \
+    setup-game-agent \
+    setup-game-deck-agent \
+    setup-game-cards \
+    setup-game-weblet \
+    "$@"

@@ -22,6 +22,12 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "setup:player-0": "scripts/setup-player-0",
+    "setup:player-0:fresh": "scripts/setup-player-0 --fresh",
+    "setup:player-1": "scripts/setup-player-1",
+    "setup:player-1:fresh": "scripts/setup-player-1 --fresh",
+    "setup:weblet": "scripts/setup-weblet",
+    "setup:weblet:fresh": "scripts/setup-weblet --fresh",
     "start": "./src/start.sh",
     "dev": "./src/dev.sh",
     "test": "ava",
@@ -38,6 +44,7 @@
     "lint:eslint": "eslint '**/*.js'"
   },
   "devDependencies": {
+    "@endo/cli": "^2.2.0",
     "@endo/lockdown": "^1.0.7",
     "@endo/ses-ava": "^1.2.2"
   },
@@ -64,9 +71,11 @@
   },
   "dependencies": {
     "@endo/daemon": "^2.3.0",
+    "@endo/exo": "^1.5.0",
     "@endo/far": "^1.1.2",
     "@endo/grain": "0.1.0",
     "@endo/promise-kit": "^1.1.2",
+    "@endo/patterns": "^1.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }
